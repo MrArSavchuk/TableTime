@@ -1,6 +1,8 @@
 # TableTime — Book tables the friendly way 🍽️
 
-**TableTime** is a polished, production-style reservation flow you can drop into your app or use as a reference. It includes a type-ahead restaurant picker, smart date/time inputs with **live availability**, a delightful confirmation screen (.ics/Google Calendar), and a full **Manage bookings** section to search, cancel, and **reschedule**.
+👉 **Live demo:** https://tabletime123.netlify.app
+
+**TableTime** is a polished, production-style reservation flow you can drop into your app or use as a reference. It includes a type‑ahead restaurant picker, smart date/time inputs with **live availability**, a delightful confirmation screen (.ics/Google Calendar), and a full **Manage bookings** section to search, cancel, and **reschedule**.
 
 > Built with **React + Vite** and powered by a fully mocked backend using **MSW** — so you can run it anywhere with zero setup.
 
@@ -8,7 +10,7 @@
 
 ## Why you might love it
 
-- 💡 **Realistic UX**: the flow mirrors common booking patterns users expect.
+- 💡 **Realistic UX**: mirrors common booking patterns users expect.
 - ⚡ **Snappy dev experience**: MSW mocks the network at the Service Worker layer.
 - 🧭 **Accessible by design**: labeled controls, keyboard navigation, helpful errors.
 - 🌓 **Dark/Light theme**: instant toggle, persisted.
@@ -16,24 +18,11 @@
 
 ---
 
-## Demo (screens)
-
-- Booking form with availability popover  
-  _[screenshot here]_
-
-- Confirmation with add-to-calendar + share actions  
-  _[screenshot here]_
-
-- Manage bookings (search, cancel, reschedule)  
-  _[screenshot here]_
-
----
-
 ## Features at a glance
 
 - 🔍 Type-ahead **Restaurant** input with keyboard navigation  
 - 📆 Strict **MM/DD/YYYY** date masking + native date picker  
-- ⏱️ **Availability** per date & restaurant (17:00–22:00, 30-min steps)  
+- ⏱️ **Availability** per date & restaurant (17:00–22:00, 30‑min steps)  
 - ✅ Friendly validation via **React Hook Form**  
 - 📝 “Remember my details” (localStorage)  
 - 📤 **.ics** export + **Google Calendar** link  
@@ -82,27 +71,27 @@ src/
 
 ## API (mocked)
 
-- `GET /api/restaurants` → list of `{id,name}`
-- `GET /api/availability?restaurant=<id>&date=<YYYY-MM-DD>` → `{ slots: ["17:00",...], capacityPerSlot }`
-- `POST /api/bookings` → create booking (returns `code`)
-- `GET /api/bookings?email=&date=` → list bookings
-- `DELETE /api/bookings/:code` → cancel
-- `PATCH /api/bookings/:code` → reschedule
+- `GET /api/restaurants` → list of `{id,name}`  
+- `GET /api/availability?restaurant=<id>&date=<YYYY-MM-DD>` → `{ slots: ["17:00",...], capacityPerSlot }`  
+- `POST /api/bookings` → create booking (returns `code`)  
+- `GET /api/bookings?email=&date=` → list bookings  
+- `DELETE /api/bookings/:code` → cancel  
+- `PATCH /api/bookings/:code` → reschedule  
 
-Conflicts return **409** so you can test real-world edge cases.
+Conflicts return **409** so you can test real‑world edge cases.
 
 ---
 
 ## Roadmap
 
-- Real backend (Prisma/Postgres or Firebase)
-- Authenticated “My bookings”
-- Multi-timezone handling
-- i18n, alt date formats
-- Cypress tests
+- Real backend (Prisma/Postgres or Firebase)  
+- Authenticated “My bookings”  
+- Multi‑timezone handling  
+- i18n, alt date formats  
+- Cypress tests  
 
 ---
 
 ## License
 
-MIT. Use it, tweak it, ship it. If you build something cool with it, we’d love to hear! 💌
+MIT. Use it, tweak it, ship it. If you build something cool with it, I’d love to hear! 💌
