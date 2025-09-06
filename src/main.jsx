@@ -47,6 +47,13 @@ async function enableMocksIfNeeded() {
 }
 
 (async () => {
+  window.addEventListener("error", (e) => {
+    console.error("window.error:", e?.error || e?.message, e);
+  });
+  window.addEventListener("unhandledrejection", (e) => {
+    console.error("unhandledrejection:", e?.reason || e);
+  });
+
   await enableMocksIfNeeded();
 
   const root = ReactDOM.createRoot(document.getElementById("root"));
