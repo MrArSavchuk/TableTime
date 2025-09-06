@@ -4,13 +4,8 @@ import App from "./App.jsx";
 import "./styles.css";
 
 class RootErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { error: null };
-  }
-  static getDerivedStateFromError(err) {
-    return { error: err };
-  }
+  constructor(props) { super(props); this.state = { error: null }; }
+  static getDerivedStateFromError(err) { return { error: err }; }
   componentDidCatch(error, info) {
     console.error("Root error boundary caught:", error, info?.componentStack);
   }
@@ -31,9 +26,7 @@ async function enableMocksIfNeeded() {
   const enabled =
     import.meta.env.DEV ||
     String(import.meta.env.VITE_ENABLE_MSW).toLowerCase() === "true";
-
   if (!enabled) return;
-
   try {
     const { worker } = await import("./mocks/browser");
     await worker.start({
@@ -56,8 +49,7 @@ async function enableMocksIfNeeded() {
 
   await enableMocksIfNeeded();
 
-  const root = ReactDOM.createRoot(document.getElementById("root"));
-  root.render(
+  ReactDOM.createRoot(document.getElementById("root")).render(
     <React.StrictMode>
       <RootErrorBoundary>
         <App />
