@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import BookingForm from "./components/BookingForm";
 import ManageBooking from "./components/ManageBooking";
 import PromoBillboard from "./components/PromoBillboard";
+import "./styles.css";
 
 export default function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem("tt-theme") || "dark");
