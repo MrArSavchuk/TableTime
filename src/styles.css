@@ -327,7 +327,7 @@ input[type="time"]::-webkit-calendar-picker-indicator { opacity: 0; }
 /* =========================
    Page background (day/night)
    ========================= */
-/* Файлы лежат в /public → абсолютный путь */
+/* Files live in /public → use absolute URL */
 :root {
   --bg-image: url('/back_day.jpg');
   --bg-overlay: rgba(255, 255, 255, .20);
@@ -348,29 +348,30 @@ body::before {
 }
 
 /* =========================
-   Advertising billboard
+   Advertising billboard (sidebar)
    ========================= */
+/* Inserted under the theme switch in the sidebar */
 .sidebar .ad-board { margin-top: 16px; }
 
 .ad-board {
   position: relative;
   width: 100%;
-  aspect-ratio: 9 / 16;                     /* вертикальная ориентация */
+  aspect-ratio: 9 / 16;                       /* vertical orientation */
   border-radius: 14px;
   overflow: hidden;
   border: 1px solid var(--stroke);
   background-color: #000;
-  /* быстрый первый кадр из React через переменную */
+  /* fast-first frame via CSS variable from React */
   background-image: var(--ad-bg);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   box-shadow: var(--shadow);
   cursor: pointer;
-  isolation: isolate;                        /* свой стек слоёв */
+  isolation: isolate;                          /* its own stacking context */
 }
 
-/* 0 — стек изображений */
+/* image stack under overlays */
 .ad-stack { position: absolute; inset: 0; z-index: 0; }
 
 .ad-frame {
@@ -392,7 +393,7 @@ body::before {
 }
 @keyframes ad-zoom { 0% {transform:scale(1);} 100% {transform:scale(1.05);} }
 
-/* 1 — виньетка над изображениями */
+/* vignette sits above images but below text */
 .ad-board::after {
   content: "";
   position: absolute;
@@ -404,17 +405,17 @@ body::before {
     linear-gradient(180deg, rgba(0,0,0,.06) 0%, rgba(0,0,0,.35) 85%);
 }
 
-/* 4 — бейдж “Advertising” поверх всего */
+/* badge sits above vignette */
 .ad-tag {
   position: absolute;
+  z-index: 4;
   left: 12px;
   top: 12px;
-  z-index: 4;                                /* было 3 — сделали выше */
   padding: 6px 10px;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: .08em;
   text-transform: uppercase;
+  letter-spacing: .08em;
   color: #fff;
   background: rgba(0, 0, 0, .28);
   border: 1px solid color-mix(in srgb, #ffffff 35%, transparent);
@@ -423,20 +424,20 @@ body::before {
   user-select: none;
 }
 
-/* 3 — ховер-оверлей с заголовком и подписью */
+/* hover overlay text sits above vignette */
 .ad-hover {
   position: absolute;
-  inset: 0;
   z-index: 3;
+  inset: 0;
   display: grid;
   place-items: end start;
-  padding: 14px 14px 16px;                   /* уточнили отступы */
+  padding: 14px;
   background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,.45) 100%);
   color: #fff;
   opacity: 0;
   transform: translateY(6px);
   transition: opacity .25s ease, transform .25s ease;
-  pointer-events: none;                      /* только визуальный слой */
+  pointer-events: none; /* visual-only */
 }
 .ad-board:hover .ad-hover,
 .ad-board.is-hover .ad-hover {
@@ -444,31 +445,71 @@ body::before {
   transform: translateY(0);
 }
 
-.ad-hover-inner {
-  max-width: 85%;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+.ad-hover-inner { max-width: 85%; }
+.ad-title { font-weight: 800; font-size: 15px; line-height: 1.15; margin-bottom: 2px; }
+.ad-sub   { font-size: 12px; opacity: .95; }
+
+/* fullscreen dialog for the ad */
+.ad-fullscreen {
+  width: min(920px, 92vw);
+  max-height: 86vh;
+  background: var(--panel);
+  color: var(--text);
+  border: 1.5px solid var(--stroke);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 24px;
+  position: relative;
+  overflow: auto;
 }
-.ad-title {
-  display: block;
-  font-weight: 800;
-  font-size: 15px;
-  line-height: 1.15;
-  margin: 0;
+.ad-fullscreen-content {
+  display: grid;
+  gap: 8px;
+  text-align: center;
+  padding: 24px 6px 6px;
 }
-.ad-sub {
-  display: block;
-  font-size: 12px;
+.ad-fullscreen-content h1 {
+  margin: 0 0 6px;
+  font-size: clamp(28px, 4vw, 44px);
+  line-height: 1.12;
+}
+.ad-fullscreen-content p {
   margin: 0;
-  opacity: .95;
+  color: var(--muted);
+  font-size: clamp(14px, 2vw, 16px);
+}
+.ad-close {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--stroke);
+  background: var(--panel);
+  color: var(--text);
+  border-radius: 10px;
+  cursor: pointer;
 }
 
-/* A11y */
+/* =========================
+   A11y / Motion
+   ========================= */
 @media (hover: none) {
+  /* show helper overlay on touch */
   .ad-board .ad-hover {
     opacity: 1;
     transform: none;
     background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,.35) 100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .addon-btn,
+  .ad-frame,
+  .ad-board .ad-hover {
+    transition: none;
+    animation: none;
   }
 }

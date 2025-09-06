@@ -5,40 +5,41 @@ import ad2 from "../assets/ad_billboard_two.jpg";
 import ad3 from "../assets/ad_billboard_three.jpg";
 
 export default function PromoBillboard() {
-  // Заглушки: название и кратчайшее описание
   const ads = useMemo(
     () => [
-      { img: ad1, title: "ACME Tools",       sub: "Premium gear for kitchen & backyard." },
-      { img: ad2, title: "Coffee Roasters",  sub: "Small-batch beans. Big aroma." },
-      { img: ad3, title: "Green Market",     sub: "Fresh local produce, daily." },
+      { img: ad1, title: "ACME Tools",      sub: "Premium gear for kitchen & backyard." },
+      { img: ad2, title: "Coffee Roasters", sub: "Small-batch beans. Big aroma." },
+      { img: ad3, title: "Green Market",    sub: "Local produce. Fresh every day." },
     ],
     []
   );
 
   const [idx, setIdx] = useState(0);
   const [open, setOpen] = useState(false);
-  const [isHover, setIsHover] = useState(false);
+  const [hover, setHover] = useState(false);
 
-  // Автосмена баннеров
   useEffect(() => {
     const t = setInterval(() => setIdx((i) => (i + 1) % ads.length), 7000);
     return () => clearInterval(t);
   }, [ads.length]);
 
-  // Текущий кадр — ещё и CSS-переменная для мгновенного фона
-  const adBg = { "--ad-bg": `url(${ads[idx].img})` };
+  const safetyZ = { zIndex: 9, position: "absolute" };
 
   return (
     <>
       <div
-        className={`ad-board${isHover ? " is-hover" : ""}`}
-        style={adBg}
-        onMouseEnter={() => setIsHover(true)}
-        onMouseLeave={() => setIsHover(false)}
+        className={`ad-board ${hover ? "is-hover" : ""}`}
+        style={{ "--ad-bg": `url(${ads[idx].img})` }}
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
         onClick={() => setOpen(true)}
+        role="button"
+        tabIndex={0}
         aria-label="Open promo"
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpen(true); }
+        }}
       >
-        {/* Стек изображений (плавный фейд) */}
         <div className="ad-stack">
           {ads.map((a, i) => (
             <img
@@ -51,14 +52,12 @@ export default function PromoBillboard() {
           ))}
         </div>
 
-        {/* Бейдж */}
-        <div className="ad-tag">Advertising</div>
+        <div className="ad-tag" style={safetyZ}>Advertising</div>
 
-        {/* Ховер-оверлей с заглушкой */}
-        <div className="ad-hover">
+        <div className="ad-hover" style={safetyZ}>
           <div className="ad-hover-inner">
-            <div className="ad-title">{ads[idx].title}</div>
-            <div className="ad-sub">{ads[idx].sub}</div>
+            <span className="ad-title">{ads[idx].title}</span>
+            <span className="ad-sub">{ads[idx].sub}</span>
           </div>
         </div>
       </div>
