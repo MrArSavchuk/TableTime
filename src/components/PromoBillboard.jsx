@@ -17,33 +17,32 @@ export default function PromoBillboard() {
   const [idx, setIdx] = useState(0);
   const [open, setOpen] = useState(false);
 
+  // Автопереключение
   useEffect(() => {
-    const t = setInterval(() => setIdx((i) => (i + 1) % ads.length), 7000);
+    const t = setInterval(() => setIdx(i => (i + 1) % ads.length), 7000);
     return () => clearInterval(t);
   }, [ads.length]);
 
+  // Предзагрузка для плавности
   useEffect(() => {
-    ads.forEach(({ img }) => {
-      const i = new Image();
-      i.src = img;
-    });
+    ads.forEach(({ img }) => { const i = new Image(); i.src = img; });
   }, [ads]);
 
   const currentImg = ads[idx].img;
 
   return (
     <>
+      {/* Передаём текущий фон НЕ через backgroundImage,
+          а через CSS-переменную (надёжно и не конфликтует
+          с шортхэндом background в стилях) */}
       <div
         className="ad-board"
         onClick={() => setOpen(true)}
         aria-label="Open promo"
-        style={{
-          backgroundImage: `url(${currentImg})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
+        style={{ "--ad-bg": `url("${currentImg}")` }}
       >
+        {/* Слой img для анимации + фоллбек: если img не загрузится,
+            фон из --ad-bg всё равно виден */}
         <div className="ad-stack" aria-hidden="true">
           {ads.map((a, i) => (
             <img
@@ -53,9 +52,7 @@ export default function PromoBillboard() {
               aria-hidden="true"
               className={`ad-frame ${i === idx ? "active" : ""}`}
               draggable="false"
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-              }}
+              onError={(e) => { e.currentTarget.style.display = "none"; }}
             />
           ))}
         </div>
@@ -76,7 +73,7 @@ export default function PromoBillboard() {
             <button className="ad-close" onClick={() => setOpen(false)} aria-label="Close">✕</button>
             <div className="ad-fullscreen-content">
               <h1>Here could be your advertising</h1>
-              <p>This is a placeholder. Provide a banner, a short pitch and a link — and we’ll wire it up.</p>
+              <p>This is a placeholder. Provide a banner, a short pitch and a link — we’ll wire it up.</p>
             </div>
           </div>
         </div>
