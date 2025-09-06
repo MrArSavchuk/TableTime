@@ -193,6 +193,22 @@ export default function BookingForm() {
     return () => { alive = false; };
   }, []);
 
+  useEffect(() => {
+  let cancelled = false;
+  const load = async (retry = false) => {
+    try {
+      const r = await fetch("/api/restaurants");
+      if (!r.ok) throw new Error("not ok");
+      const list = await r.json();
+      if (!cancelled && Array.isArray(list) && list.length) setRestaurants(list);
+    } catch {
+      if (!retry) setTimeout(() => load(true), 500); // один повтор через 0.5с
+    }
+  };
+  load();
+  return () => { cancelled = true; };
+}, []);
+
   // Configure min/max for native <input type="date"> to enforce range in UI.
   useEffect(() => {
     const el = dateNativeRef.current;

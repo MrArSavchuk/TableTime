@@ -18,8 +18,7 @@ class RootErrorBoundary extends Component {
         <div style={{ padding: 24 }}>
           <h2>Something went wrong</h2>
           <p className="muted">
-            The app hit a runtime error. Please reload the page. If this keeps
-            happening, copy the error from the browser console and share it.
+            The app hit a runtime error. Please reload the page. Check console for details.
           </p>
         </div>
       );
@@ -28,20 +27,12 @@ class RootErrorBoundary extends Component {
   }
 }
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(
-  <React.StrictMode>
-    <RootErrorBoundary>
-      <App />
-    </RootErrorBoundary>
-  </React.StrictMode>
-);
+async function bootstrap() {
+  const enableMSW =
+    import.meta.env.DEV ||
+    String(import.meta.env.VITE_ENABLE_MSW).toLowerCase() === "true";
 
-const enableMSW =
-  import.meta.env.DEV || String(import.meta.env.VITE_ENABLE_MSW).toLowerCase() === "true";
-
-if (enableMSW) {
-  (async () => {
+  if (enableMSW) {
     try {
       const { worker } = await import("./mocks/browser");
       await worker.start({
@@ -52,5 +43,16 @@ if (enableMSW) {
     } catch (e) {
       console.warn("MSW failed to start (app keeps working):", e);
     }
-  })();
+  }
+
+  const root = ReactDOM.createRoot(document.getElementById("root"));
+  root.render(
+    <React.StrictMode>
+      <RootErrorBoundary>
+        <App />
+      </RootErrorBoundary>
+    </React.StrictMode>
+  );
 }
+
+bootstrap();
