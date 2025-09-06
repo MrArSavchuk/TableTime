@@ -5,33 +5,40 @@ import ad2 from "../assets/ad_billboard_two.jpg";
 import ad3 from "../assets/ad_billboard_three.jpg";
 
 export default function PromoBillboard() {
+  // Заглушки: название и кратчайшее описание
   const ads = useMemo(
     () => [
-      { img: ad1, title: "ACME Tools",      sub: "Premium gear for kitchen & backyard." },
-      { img: ad2, title: "Coffee Roasters", sub: "Small-batch beans. Big aroma." },
-      { img: ad3, title: "Green Market",    sub: "Local produce. Fresh every day." },
+      { img: ad1, title: "ACME Tools",       sub: "Premium gear for kitchen & backyard." },
+      { img: ad2, title: "Coffee Roasters",  sub: "Small-batch beans. Big aroma." },
+      { img: ad3, title: "Green Market",     sub: "Fresh local produce, daily." },
     ],
     []
   );
 
   const [idx, setIdx] = useState(0);
   const [open, setOpen] = useState(false);
+  const [isHover, setIsHover] = useState(false);
 
+  // Автосмена баннеров
   useEffect(() => {
     const t = setInterval(() => setIdx((i) => (i + 1) % ads.length), 7000);
     return () => clearInterval(t);
   }, [ads.length]);
 
+  // Текущий кадр — ещё и CSS-переменная для мгновенного фона
+  const adBg = { "--ad-bg": `url(${ads[idx].img})` };
+
   return (
     <>
-      {/* ВАЖНО: прокидываем фон через --ad-bg */}
       <div
-        className="ad-board"
-        style={{ "--ad-bg": `url(${ads[idx].img})` }}
+        className={`ad-board${isHover ? " is-hover" : ""}`}
+        style={adBg}
+        onMouseEnter={() => setIsHover(true)}
+        onMouseLeave={() => setIsHover(false)}
         onClick={() => setOpen(true)}
         aria-label="Open promo"
       >
-        {/* стек для плавного фейда */}
+        {/* Стек изображений (плавный фейд) */}
         <div className="ad-stack">
           {ads.map((a, i) => (
             <img
@@ -44,11 +51,11 @@ export default function PromoBillboard() {
           ))}
         </div>
 
-        {/* бейдж */}
+        {/* Бейдж */}
         <div className="ad-tag">Advertising</div>
 
-        {/* ховер-подпись */}
-        <div className="ad-hover" aria-hidden="true">
+        {/* Ховер-оверлей с заглушкой */}
+        <div className="ad-hover">
           <div className="ad-hover-inner">
             <div className="ad-title">{ads[idx].title}</div>
             <div className="ad-sub">{ads[idx].sub}</div>

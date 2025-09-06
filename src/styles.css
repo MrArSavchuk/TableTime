@@ -509,3 +509,4 @@ body::before {
     animation: none;
   }
 }
+.ad-board.is-hover .ad-hover { opacity: 1; transform: translateY(0); }
