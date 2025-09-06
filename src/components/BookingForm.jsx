@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+// src/components/BookingForm.jsx
+
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
-// Light/Dark icons for the date and time addon buttons.
 import calLight from "../assets/icon_cal_l.png";
 import calDark from "../assets/icon_cal_d.png";
 import clkLight from "../assets/icon_cloc_l.png";
@@ -11,36 +12,30 @@ import clkDark from "../assets/icon_cloc_d.png";
    Helpers
    ──────────────────────────────────────────────────────────────────────────── */
 
-// Format a raw string into MM/DD/YYYY while the user types.
 const maskDate = (v) => {
   const d = String(v || "").replace(/\D/g, "").slice(0, 8);
   const mm = d.slice(0, 2), dd = d.slice(2, 4), yyyy = d.slice(4, 8);
   return [mm, dd, yyyy].filter(Boolean).join("/");
 };
 
-// Convert "MM/DD/YYYY" to ISO "YYYY-MM-DD".
 const toISO = (mmddyyyy) => {
   const s = String(mmddyyyy || "");
   const m = s.slice(0, 2), d = s.slice(3, 5), y = s.slice(6, 10);
   return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 };
 
-// Convert ISO "YYYY-MM-DD" to "MM/DD/YYYY".
 const fromISOtoMMDDYYYY = (iso) => {
-  if (!iso || typeof iso !== "string" || !iso.includes("-")) return iso ?? "";
+  if (!iso || typeof iso !== "string" || !iso.includes("-")) return iso || "";
   const [y, m, d] = iso.split("-");
   return `${m}/${d}/${y}`;
 };
 
-// Case/diacritics-insensitive match (safe).
 const norm = (s) => {
-  const str = String(s ?? "");
-  // normalize() может отсутствовать в очень старых вебвью — подстраховка
+  const str = String(s || "");
   const normalized = typeof str.normalize === "function" ? str.normalize("NFD") : str;
   return normalized.toLowerCase().replace(/[\u0300-\u036f]/g, "").trim();
 };
 
-// Parse "MM/DD/YYYY" into a Date (local).
 const parseMMDDYYYY = (s) => {
   const src = String(s || "");
   const mm = Number(src.slice(0, 2));
@@ -49,39 +44,42 @@ const parseMMDDYYYY = (s) => {
   return new Date(yyyy, mm - 1, dd);
 };
 
-// Strip time to 00:00.
 const stripTime = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
-// Local fallback restaurants list (in case API is not reachable).
 const FALLBACK_FULL = [
-  "Sea Breeze", "Urban Grill", "La Piazza", "Golden Dragon", "Garden Bistro", "Bluefin Sushi",
-  "Rustic Oven", "Spice Route", "Emerald Steakhouse", "Cedar & Sage", "Copper Pot", "Sunset Terrace",
-  "Harbor House", "Maple & Co.", "Cocoa Bean Cafe", "Lotus Garden", "Rio Cantina", "Falafel & Co.",
-  "Olive Grove", "Truffle & Thyme", "Pier 27", "Red Lantern", "Midnight Diner", "Tandoori Flame",
-  "Noodle Nook", "Pasta Fresca", "BBQ Junction", "Tapas & Tonic", "Pho Station", "Saffron Table",
-  "Basilico", "Lemon & Lime", "Poke Planet", "Kebab Express", "Waffle Works", "Soup Society",
-  "Burger Barn", "Avocado Bar", "Morning Glory", "The Pantry", "Chili & Lime", "Miso & More",
-  "Curry Leaf", "Oyster Bar", "Meze House", "Cactus Grill", "Ramen Republic", "Mozzarella Lab",
-  "Bread & Butter", "Vegan Vibes"
+  "Sea Breeze", "Urban Grill", "La Piazza", "Golden Dragon", "Garden Bistro",
+  "Bluefin Sushi", "Rustic Oven", "Spice Route", "Emerald Steakhouse", "Cedar & Sage",
+  "Copper Pot", "Sunset Terrace", "Harbor House", "Maple & Co.", "Cocoa Bean Cafe",
+  "Lotus Garden", "Rio Cantina", "Falafel & Co.", "Olive Grove", "Truffle & Thyme",
+  "Pier 27", "Red Lantern", "Midnight Diner", "Tandoori Flame", "Noodle Nook",
+  "Pasta Fresca", "BBQ Junction", "Tapas & Tonic", "Pho Station", "Saffron Table",
+  "Basilico", "Lemon & Lime", "Poke Planet", "Kebab Express", "Waffle Works",
+  "Soup Society", "Burger Barn", "Avocado Bar", "Morning Glory", "The Pantry",
+  "Chili & Lime", "Miso & More", "Curry Leaf", "Oyster Bar", "Meze House",
+  "Cactus Grill", "Ramen Republic", "Mozzarella Lab", "Bread & Butter", "Vegan Vibes"
 ].map((name, i) => ({ id: String(i + 1), name }));
+
 const FALLBACK_MIN = [{ id: "any", name: "Any" }];
 
-/** Observe <html data-theme="..."> */
 function useTheme() {
-  const get = () => document.documentElement.getAttribute("data-theme") || "light";
+  const get = () =>
+    typeof document !== "undefined"
+      ? document.documentElement.getAttribute("data-theme") || "light"
+      : "light";
+
   const [theme, setTheme] = useState(get);
+
   useEffect(() => {
-    const el = document.documentElement;
-    // В некоторых старых вебвью MutationObserver может отсутствовать
     if (typeof window.MutationObserver !== "function") return;
+    const el = document.documentElement;
     const obs = new MutationObserver(() => setTheme(get()));
     obs.observe(el, { attributes: true, attributeFilter: ["data-theme"] });
     return () => obs.disconnect();
   }, []);
+
   return theme;
 }
 
-/** Build Google Calendar "dates" range (UTC) */
 const toCalDT = (dateISO, time, plusMin = 90) => {
   const start = new Date(`${dateISO}T${time}:00`);
   const end = new Date(start);
@@ -90,7 +88,6 @@ const toCalDT = (dateISO, time, plusMin = 90) => {
   return { start: fmt(start), end: fmt(end) };
 };
 
-// crypto.randomUUID fallback for older engines
 const safeUUID = () =>
   (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function")
     ? crypto.randomUUID()
@@ -109,7 +106,6 @@ export default function BookingForm() {
     (Intl?.DateTimeFormat && Intl.DateTimeFormat().resolvedOptions().timeZone) ||
     "Your local time";
 
-  // today…+60d
   const MAX_DAYS = 60;
   const today = useMemo(() => stripTime(new Date()), []);
   const maxDate = useMemo(() => {
@@ -151,8 +147,12 @@ export default function BookingForm() {
   const [serverError, setServerError] = useState("");
 
   const [remember, setRemember] = useState(() => {
-    const v = localStorage.getItem("tt-remember");
-    return v === null ? true : v === "1";
+    try {
+      const v = localStorage.getItem("tt-remember");
+      return v === null ? true : v === "1";
+    } catch {
+      return true;
+    }
   });
 
   const [restQuery, setRestQuery] = useState("");
@@ -174,7 +174,6 @@ export default function BookingForm() {
     else el.focus();
   };
 
-  // Load restaurants (with one soft retry if SW/connection не успел подняться)
   useEffect(() => {
     let cancelled = false;
     const load = async (retry = false) => {
@@ -184,14 +183,13 @@ export default function BookingForm() {
         const list = await r.json();
         if (!cancelled && Array.isArray(list) && list.length) setRestaurants(list);
       } catch {
-        if (!retry) setTimeout(() => load(true), 400); // one retry
+        if (!retry) setTimeout(() => load(true), 400);
       }
     };
     load();
     return () => { cancelled = true; };
   }, []);
 
-  // Limit for native <input type="date">
   useEffect(() => {
     const el = dateNativeRef.current;
     if (!el) return;
@@ -200,7 +198,6 @@ export default function BookingForm() {
     el.max = toISODate(maxDate);
   }, [today, maxDate]);
 
-  // Prefill from localStorage
   useEffect(() => {
     try {
       const nm = localStorage.getItem("tt-name") || "";
@@ -212,9 +209,8 @@ export default function BookingForm() {
         setRestQuery(rr);
         setValue("restaurant", rr, { shouldValidate: true });
       }
-    } catch (e) {
-      // если localStorage недоступен (privacy mode) — просто молча пропускаем
-      console.warn("localStorage access skipped:", e);
+    } catch {
+      console.warn("localStorage access skipped");
     }
   }, [setValue]);
 
@@ -222,13 +218,10 @@ export default function BookingForm() {
     restaurants.some((r) => norm(r.name) === norm(value)) ||
     "Select a restaurant from the list";
 
-  // Load available time slots when date & restaurant are valid
   const dateVal = watch("date");
   useEffect(() => {
     const picked = restaurants.find((r) => norm(r.name) === norm(restQuery));
-    const validDate =
-      /^(0[1-9]|1[0-2])\/(0[1-9]|[12]\d|3[01])\/\d{4}$/.test(String(dateVal || "")) &&
-      withinRange(dateVal);
+    const validDate = /^\d{2}\/\d{2}\/\d{4}$/.test(String(dateVal || "")) && withinRange(dateVal);
 
     if (!picked || !validDate) {
       setAvailableSlots([]);
@@ -243,7 +236,6 @@ export default function BookingForm() {
       .catch(() => setAvailableSlots([]));
   }, [restQuery, dateVal, restaurants]);
 
-  // Submit handler
   const onSubmit = async (data) => {
     setServerError("");
     setResult(null);
@@ -252,7 +244,6 @@ export default function BookingForm() {
         restaurants.find((r) => norm(r.name) === norm(data.restaurant)) ||
         FALLBACK_MIN[0];
 
-      // remember me
       try {
         localStorage.setItem("tt-remember", remember ? "1" : "0");
         if (remember) {
@@ -265,7 +256,7 @@ export default function BookingForm() {
           localStorage.removeItem("tt-restaurant");
         }
       } catch {
-        /* ignore storage errors silently */
+        // ignore
       }
 
       const payload = {
@@ -301,7 +292,6 @@ export default function BookingForm() {
     }
   };
 
-  // ICS download
   const downloadICS = ({ title, location, description, dateISO, time, durationMin = 90 }) => {
     const start = `${dateISO.replace(/-/g, "")}T${time.replace(":", "")}00`;
     const endDate = new Date(`${dateISO}T${time}:00`);
@@ -328,7 +318,6 @@ export default function BookingForm() {
     URL.revokeObjectURL(url);
   };
 
-  // If a booking was just created — confirmation card
   if (result) {
     const gcal = (() => {
       const { start, end } = toCalDT(result.date, result.time, 90);
@@ -345,29 +334,33 @@ export default function BookingForm() {
     return (
       <section className="card success">
         <h2>Booking Confirmed</h2>
-        <p className="muted">Confirmation code: <strong>{result.code}</strong></p>
+        <p className="muted">
+          Confirmation code: <strong>{result.code}</strong>
+        </p>
         <ul className="details">
           <li><b>Restaurant</b> — {result.restaurantName}</li>
           <li><b>Date</b> — {fromISOtoMMDDYYYY(result.date)}</li>
           <li><b>Time</b> — {result.time}</li>
-          <li><b>Guests</b> — {result.guests}</li>
+          <li><b>Guests</b> — {result.guests}</li> 
           <li><b>Name</b> — {result.name}</li>
           <li><b>Email</b> — {result.email}</li>
         </ul>
-        {result.note && <p><b>Note:</b> {result.note}</p>}
+        {result.note && <p><strong>Note:</strong> {result.note}</p>}
 
         <div className="actions">
           <button
             type="button"
             className="btn"
-            onClick={() => downloadICS({
-              title: "TableTime Reservation",
-              location: result.restaurantName,
-              description: `Reservation code: ${result.code}`,
-              dateISO: result.date,
-              time: result.time,
-              durationMin: 90
-            })}
+            onClick={() =>
+              downloadICS({
+                title: "TableTime Reservation",
+                location: result.restaurantName,
+                description: `Reservation code: ${result.code}`,
+                dateISO: result.date,
+                time: result.time,
+                durationMin: 90,
+              })
+            }
           >
             Add to Calendar (.ics)
           </button>
@@ -379,20 +372,21 @@ export default function BookingForm() {
           <button
             type="button"
             className="btn ghost"
-            onClick={() => { navigator.clipboard?.writeText(result.code); }}
+            onClick={() => {
+              navigator.clipboard?.writeText(result.code);
+            }}
           >
             Copy code
           </button>
 
-          <button
-            type="button"
-            className="btn ghost"
-            onClick={() => window.print()}
-          >
+          <button type="button" className="btn ghost" onClick={() => window.print()}>
             Print
           </button>
 
-          <button className="btn" onClick={() => { setResult(null); reset(); }}>
+          <button className="btn" onClick={() => {
+            setResult(null);
+            reset();
+          }}>
             Make another booking
           </button>
         </div>
@@ -400,13 +394,15 @@ export default function BookingForm() {
     );
   }
 
-  // RHF validators/regs
-  const restaurantReg = register("restaurant", { required: true, validate: isValidRestaurant });
+  const restaurantReg = register("restaurant", {
+    required: true,
+    validate: isValidRestaurant,
+  });
   const dateReg = register("date", {
     required: "Use MM/DD/YYYY",
     validate: (v) =>
       (/^(0[1-9]|1[0-2])\/(0[1-9]|[12]\d|3[01])\/\d{4}$/.test(String(v)) && withinRange(v)) ||
-      "Date out of range (today…+60d)"
+      "Date out of range (today…+60d)",
   });
   const timeReg = register("time", {
     required: "Pick a time",
@@ -423,7 +419,6 @@ export default function BookingForm() {
     }
   }, [showTimePanel]);
 
-  // Render form
   return (
     <section className="card">
       <h2>Book a table</h2>
@@ -436,7 +431,8 @@ export default function BookingForm() {
 
       <form className="form" onSubmit={submitRHF(onSubmit)} noValidate>
         <div className="grid">
-          {/* Restaurant (combobox-like text input) */}
+
+          {/* Restaurant */}
           <div className="field searchable">
             <label htmlFor="restaurant">Restaurant</label>
             <input
@@ -447,7 +443,10 @@ export default function BookingForm() {
               value={restQuery}
               aria-expanded={openSuggest ? "true" : "false"}
               aria-controls="restaurant-suggestions"
-              onFocus={() => { setOpenSuggest(true); setHi(0); }}
+              onFocus={() => {
+                setOpenSuggest(true);
+                setHi(0);
+              }}
               onChange={(e) => {
                 restaurantReg.onChange(e);
                 setRestQuery(e.target.value);
@@ -456,8 +455,14 @@ export default function BookingForm() {
               }}
               onKeyDown={(e) => {
                 if (!openSuggest || filtered.length === 0) return;
-                if (e.key === "ArrowDown") { e.preventDefault(); setHi((i) => Math.min(i + 1, filtered.length - 1)); }
-                if (e.key === "ArrowUp") { e.preventDefault(); setHi((i) => Math.max(i - 1, 0)); }
+                if (e.key === "ArrowDown") {
+                  e.preventDefault();
+                  setHi((i) => Math.min(i + 1, filtered.length - 1));
+                }
+                if (e.key === "ArrowUp") {
+                  e.preventDefault();
+                  setHi((i) => Math.max(i - 1, 0));
+                }
                 if (e.key === "Enter") {
                   e.preventDefault();
                   const pick = filtered[hi];
@@ -518,7 +523,7 @@ export default function BookingForm() {
             </select>
           </div>
 
-          {/* Date (masked) */}
+          {/* Date field with picker */}
           <div className="field with-addon">
             <label htmlFor="date">Date</label>
             <input
@@ -551,7 +556,7 @@ export default function BookingForm() {
               title="Open date picker"
               onClick={openDatePicker}
             >
-              <img src={calIcon} alt="" className="addon-icon" />
+              <img src={calIcon || ""} alt="" className="addon-icon" />
             </button>
             {errors.date && <span className="err">{errors.date.message}</span>}
             <p className="muted" style={{ marginTop: 6 }}>
@@ -559,7 +564,7 @@ export default function BookingForm() {
             </p>
           </div>
 
-          {/* Time + available slots popover */}
+          {/* Time field with slots */}
           <div className="field with-addon">
             <label htmlFor="time">Time</label>
             <input
@@ -567,7 +572,10 @@ export default function BookingForm() {
               type="time"
               lang="en-US"
               {...timeReg}
-              ref={(el) => { timeReg.ref(el); timeRef.current = el; }}
+              ref={(el) => {
+                timeReg.ref(el);
+                timeRef.current = el;
+              }}
               onFocus={() => availableSlots.length && setShowTimePanel(true)}
               onBlur={() => setTimeout(() => setShowTimePanel(false), 120)}
             />
@@ -578,9 +586,8 @@ export default function BookingForm() {
               title="Open time options"
               onClick={() => setShowTimePanel((v) => !v)}
             >
-              <img src={timeIcon} alt="" className="addon-icon" />
+              <img src={timeIcon || ""} alt="" className="addon-icon" />
             </button>
-
             <p className="muted" style={{ marginTop: 6 }}>
               {dateVal && restQuery && availableSlots.length > 0 &&
                 `${availableSlots.length} slots available`}{" "}
@@ -588,7 +595,6 @@ export default function BookingForm() {
                 "No available slots for this date"}{" "}
               • Times shown in {timeZone}.
             </p>
-
             {showTimePanel && availableSlots.length > 0 && (
               <div
                 className="popover"
@@ -597,8 +603,14 @@ export default function BookingForm() {
                 tabIndex={-1}
                 ref={timePanelRef}
                 onKeyDown={(e) => {
-                  if (e.key === "ArrowDown") { e.preventDefault(); setHiTime((i) => Math.min(i + 1, availableSlots.length - 1)); }
-                  if (e.key === "ArrowUp") { e.preventDefault(); setHiTime((i) => Math.max(i - 1, 0)); }
+                  if (e.key === "ArrowDown") {
+                    e.preventDefault();
+                    setHiTime((i) => Math.min(i + 1, availableSlots.length - 1));
+                  }
+                  if (e.key === "ArrowUp") {
+                    e.preventDefault();
+                    setHiTime((i) => Math.max(i - 1, 0));
+                  }
                   if (e.key === "Enter") {
                     e.preventDefault();
                     const t = availableSlots[hiTime];
@@ -627,14 +639,18 @@ export default function BookingForm() {
                 ))}
               </div>
             )}
-
             {errors.time && <span className="err">{errors.time.message}</span>}
           </div>
 
-          {/* Name */}
+          {/* User name */}
           <div className="field">
             <label htmlFor="name">Your name</label>
-            <input id="name" type="text" placeholder="John Doe" {...register("name", { required: "Name is required" })} />
+            <input
+              id="name"
+              type="text"
+              placeholder="John Doe"
+              {...register("name", { required: "Name is required" })}
+            />
             {errors.name && <span className="err">{errors.name.message}</span>}
           </div>
 
@@ -656,10 +672,15 @@ export default function BookingForm() {
           {/* Notes */}
           <div className="field span2">
             <label htmlFor="note">Notes (optional)</label>
-            <textarea id="note" rows="4" placeholder="Allergic to nuts, window seat, etc." {...register("note")} />
+            <textarea
+              id="note"
+              rows={4}
+              placeholder="Allergic to nuts, window seat, etc."
+              {...register("note")}
+            />
           </div>
 
-          {/* Remember-me */}
+          {/* Remember Me */}
           <div className="field span2 checkbox">
             <label className="inline">
               <input
