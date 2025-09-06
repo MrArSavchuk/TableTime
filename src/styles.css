@@ -327,7 +327,7 @@ input[type="time"]::-webkit-calendar-picker-indicator { opacity: 0; }
 /* =========================
    Page background (day/night)
    ========================= */
-/* Files live in /public → use absolute URL */
+/* Файлы лежат в /public → абсолютный путь */
 :root {
   --bg-image: url('/back_day.jpg');
   --bg-overlay: rgba(255, 255, 255, .20);
@@ -348,30 +348,30 @@ body::before {
 }
 
 /* =========================
-   Advertising billboard (sidebar)
+   Advertising billboard
    ========================= */
-/* Inserted under the theme switch in the sidebar */
+/* Вставляется в .sidebar после шапки */
 .sidebar .ad-board { margin-top: 16px; }
 
 .ad-board {
   position: relative;
   width: 100%;
-  aspect-ratio: 9 / 16;                       /* vertical orientation */
+  aspect-ratio: 9 / 16;                     /* вертикальная ориентация */
   border-radius: 14px;
   overflow: hidden;
   border: 1px solid var(--stroke);
   background-color: #000;
-  /* fast-first frame via CSS variable from React */
+  /* опционально: быстрый первый кадр через CSS-переменную */
   background-image: var(--ad-bg);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   box-shadow: var(--shadow);
   cursor: pointer;
-  isolation: isolate;                          /* its own stacking context */
+  isolation: isolate;                        /* свой стек слоёв */
 }
 
-/* image stack under overlays */
+/* 0 — картинки */
 .ad-stack { position: absolute; inset: 0; z-index: 0; }
 
 .ad-frame {
@@ -393,42 +393,23 @@ body::before {
 }
 @keyframes ad-zoom { 0% {transform:scale(1);} 100% {transform:scale(1.05);} }
 
-/* vignette sits above images but below text */
+/* 10 — виньетка над изображениями, ниже текста */
 .ad-board::after {
   content: "";
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 10;
   pointer-events: none;
   background:
     radial-gradient(90% 65% at 50% 35%, rgba(0,0,0,0) 40%, rgba(0,0,0,.25) 100%),
     linear-gradient(180deg, rgba(0,0,0,.06) 0%, rgba(0,0,0,.35) 85%);
 }
 
-/* badge sits above vignette */
-.ad-tag {
-  position: absolute;
-  z-index: 4;
-  left: 12px;
-  top: 12px;
-  padding: 6px 10px;
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  color: #fff;
-  background: rgba(0, 0, 0, .28);
-  border: 1px solid color-mix(in srgb, #ffffff 35%, transparent);
-  border-radius: 999px;
-  backdrop-filter: blur(2px);
-  user-select: none;
-}
-
-/* hover overlay text sits above vignette */
+/* 20 — ховер-подложка с заголовком и подписью */
 .ad-hover {
   position: absolute;
-  z-index: 3;
   inset: 0;
+  z-index: 20;
   display: grid;
   place-items: end start;
   padding: 14px;
@@ -437,10 +418,10 @@ body::before {
   opacity: 0;
   transform: translateY(6px);
   transition: opacity .25s ease, transform .25s ease;
-  pointer-events: none; /* visual-only */
+  pointer-events: none;                      /* только визуальный слой */
 }
 .ad-board:hover .ad-hover,
-.ad-board.is-hover .ad-hover {
+.ad-board.is-hover .ad-hover {               /* класс-фолбек из JS */
   opacity: 1;
   transform: translateY(0);
 }
@@ -449,7 +430,26 @@ body::before {
 .ad-title { font-weight: 800; font-size: 15px; line-height: 1.15; margin-bottom: 2px; }
 .ad-sub   { font-size: 12px; opacity: .95; }
 
-/* fullscreen dialog for the ad */
+/* 30 — бейдж “Advertising” поверх всего */
+.ad-tag {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  z-index: 30;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #fff;
+  background: rgba(0, 0, 0, .28);
+  border: 1px solid rgba(255,255,255,.35);
+  border-radius: 999px;
+  backdrop-filter: blur(2px);
+  user-select: none;
+}
+
+/* Fullscreen popup for ad (если используешь) */
 .ad-fullscreen {
   width: min(920px, 92vw);
   max-height: 86vh;
@@ -497,7 +497,7 @@ body::before {
    A11y / Motion
    ========================= */
 @media (hover: none) {
-  /* show helper overlay on touch */
+  /* На тач-устройствах подсказку показываем всегда */
   .ad-board .ad-hover {
     opacity: 1;
     transform: none;
