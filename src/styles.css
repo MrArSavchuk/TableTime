@@ -354,24 +354,24 @@ body::before {
 .sidebar .ad-board { margin-top: 16px; }
 
 .ad-board {
-  position: relative;
+  position: relative;                    /* контейнер для оверлеев */
   width: 100%;
-  aspect-ratio: 9 / 16;                     /* вертикальная ориентация */
+  aspect-ratio: 9 / 16;                  /* вертикальная ориентация */
   border-radius: 14px;
   overflow: hidden;
   border: 1px solid var(--stroke);
   background-color: #000;
-  /* опционально: быстрый первый кадр через CSS-переменную */
+  /* фон для быстрого кадра (инициализируется из React) */
   background-image: var(--ad-bg);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   box-shadow: var(--shadow);
   cursor: pointer;
-  isolation: isolate;                        /* свой стек слоёв */
+  isolation: isolate;                    /* свой стек слоёв */
 }
 
-/* 0 — картинки */
+/* 0 — стек картинок */
 .ad-stack { position: absolute; inset: 0; z-index: 0; }
 
 .ad-frame {
@@ -393,7 +393,7 @@ body::before {
 }
 @keyframes ad-zoom { 0% {transform:scale(1);} 100% {transform:scale(1.05);} }
 
-/* 10 — виньетка над изображениями, ниже текста */
+/* 10 — виньетка над картинками, ниже текста */
 .ad-board::after {
   content: "";
   position: absolute;
@@ -405,7 +405,7 @@ body::before {
     linear-gradient(180deg, rgba(0,0,0,.06) 0%, rgba(0,0,0,.35) 85%);
 }
 
-/* 20 — ховер-подложка с заголовком и подписью */
+/* 20 — ховер-подсказка (название + короткое описание) */
 .ad-hover {
   position: absolute;
   inset: 0;
@@ -418,13 +418,9 @@ body::before {
   opacity: 0;
   transform: translateY(6px);
   transition: opacity .25s ease, transform .25s ease;
-  pointer-events: none;                      /* только визуальный слой */
+  pointer-events: none;
 }
-.ad-board:hover .ad-hover,
-.ad-board.is-hover .ad-hover {               /* класс-фолбек из JS */
-  opacity: 1;
-  transform: translateY(0);
-}
+.ad-board:hover .ad-hover { opacity: 1; transform: translateY(0); }
 
 .ad-hover-inner { max-width: 85%; }
 .ad-title { font-weight: 800; font-size: 15px; line-height: 1.15; margin-bottom: 2px; }
@@ -449,62 +445,12 @@ body::before {
   user-select: none;
 }
 
-/* Fullscreen popup for ad (если используешь) */
-.ad-fullscreen {
-  width: min(920px, 92vw);
-  max-height: 86vh;
-  background: var(--panel);
-  color: var(--text);
-  border: 1.5px solid var(--stroke);
-  border-radius: 16px;
-  box-shadow: var(--shadow);
-  padding: 24px;
-  position: relative;
-  overflow: auto;
-}
-.ad-fullscreen-content {
-  display: grid;
-  gap: 8px;
-  text-align: center;
-  padding: 24px 6px 6px;
-}
-.ad-fullscreen-content h1 {
-  margin: 0 0 6px;
-  font-size: clamp(28px, 4vw, 44px);
-  line-height: 1.12;
-}
-.ad-fullscreen-content p {
-  margin: 0;
-  color: var(--muted);
-  font-size: clamp(14px, 2vw, 16px);
-}
-.ad-close {
-  position: absolute;
-  right: 12px;
-  top: 12px;
-  width: 36px;
-  height: 36px;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--stroke);
-  background: var(--panel);
-  color: var(--text);
-  border-radius: 10px;
-  cursor: pointer;
-}
-
-/* =========================
-   A11y / Motion
-   ========================= */
+/* Touch: показываем подсказку всегда */
 @media (hover: none) {
-  /* На тач-устройствах подсказку показываем всегда */
-  .ad-board .ad-hover {
-    opacity: 1;
-    transform: none;
-    background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,.35) 100%);
-  }
+  .ad-board .ad-hover { opacity: 1; transform: none; }
 }
 
+/* Reduce motion */
 @media (prefers-reduced-motion: reduce) {
   .addon-btn,
   .ad-frame,
