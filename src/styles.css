@@ -1,370 +1,600 @@
-/* =========================
-   Theme tokens
-   ========================= */
 :root {
-  --bg: #fafafa;
-  --panel: #ffffff;
-  --text: #1b1f23;
-  --muted: #6b7280;
-  --brand: #659DBD;
-  --accent: #DAAD86;
-  --stroke: #e5e7eb;
-  --shadow: 0 12px 30px rgba(0, 0, 0, .12);
-
-  /* Background (light): images MUST live in /public and be referenced with absolute paths */
-  --bg-image: url('/back_day.jpg');
-  --bg-overlay: rgba(255, 255, 255, .20); /* gentle light overlay */
+    --bg: #fafafa;
+    --panel: #ffffff;
+    --text: #1b1f23;
+    --muted: #6b7280;
+    --brand: #659DBD;
+    --accent: #DAAD86;
+    --stroke: #e5e7eb;
+    --shadow: 0 12px 30px rgba(0, 0, 0, .12);
 }
 
 :root[data-theme="dark"] {
-  --bg: #0f1113;
-  --panel: #171a1d;
-  --text: #e9eef2;
-  --muted: #9aa5b1;
-  --stroke: #2a2f36;
-  --shadow: 0 12px 30px rgba(0, 0, 0, .35);
-
-  /* Background (dark) */
-  --bg-image: url('/back_night.jpg');
-  --bg-overlay: rgba(0, 0, 0, .40);  /* a bit stronger for contrast in dark mode */
+    --bg: #0f1113;
+    --panel: #171a1d;
+    --text: #e9eef2;
+    --muted: #9aa5b1;
+    --stroke: #2a2f36;
+    --shadow: 0 12px 30px rgba(0, 0, 0, .35);
 }
 
-/* =========================
-   Resets
-   ========================= */
-* { box-sizing: border-box; }
-html, body, #root { height: 100%; }
+* {
+    box-sizing: border-box;
+}
 
-/* =========================
-   Global body styles
-   - Use background-* directly on body (more reliable than ::before on Netlify)
-   - iOS may ignore background-attachment: fixed; that’s OK (progressive enhancement)
-   ========================= */
+html,
+body,
+#root {
+    height: 100%;
+}
+
 body {
-  margin: 0;
-  color: var(--text);
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, "Liberation Sans", Arial;
-
-  /* Layered background: overlay + image + fallback color */
-  background-color: var(--bg);
-  background-image:
-    linear-gradient(0deg, var(--bg-overlay), var(--bg-overlay)),
-    var(--bg-image);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, "Liberation Sans", Arial;
 }
 
-/* =========================
-   App shell
-   ========================= */
 .shell {
-  display: grid;
-  grid-template-columns: 280px minmax(720px, 1fr);
-  width: min(1200px, 100% - 48px);
-  margin: 24px auto;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: var(--shadow);
-  background: var(--panel);
+    display: grid;
+    grid-template-columns: 280px minmax(720px, 1fr);
+    width: min(1200px, 100% - 48px);
+    margin: 24px auto;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    background: var(--panel);
 }
 
 @media (max-width: 1024px) {
-  .shell { grid-template-columns: 1fr; }
+    .shell {
+        grid-template-columns: 1fr;
+    }
 }
 
 .sidebar {
-  background: linear-gradient(180deg, #111 0%, #171a1d 100%);
-  color: #fff;
-  padding: 24px;
+    background: linear-gradient(180deg, #111 0%, #171a1d 100%);
+    color: #fff;
+    padding: 24px;
 }
 
-.brand { margin: 8px 0 6px 0; }
-.tag { margin: 0; opacity: .85; }
+.brand {
+    margin: 8px 0 6px 0;
+}
+
+.tag {
+    margin: 0;
+    opacity: .85;
+}
 
 .mode {
-  padding: 8px 12px;
-  border-radius: 10px;
-  border: 1px solid var(--stroke);
-  background: var(--panel);
-  color: var(--text);
-  cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--stroke);
+    background: var(--panel);
+    color: var(--text);
+    cursor: pointer;
 }
 
-/* =========================
-   Main / Card
-   ========================= */
 .main {
-  padding: 24px;
-  background: var(--bg);
-  min-width: 0;           /* prevent overflow from long content */
+    padding: 24px;
+    background: var(--bg);
+    min-width: 0;
 }
-.main > .card { width: 100%; }
+
+.main>.card {
+    width: 100%;
+}
 
 .card {
-  background: var(--panel);
-  border: 1.5px solid var(--stroke);
-  border-radius: 14px;
-  padding: 18px;
+    background: var(--panel);
+    border: 1px solid var(--stroke);
+    border-radius: 14px;
+    padding: 18px;
 }
-.card.success { border-color: #10b98155; }
 
-/* =========================
-   Forms
-   ========================= */
-.form { display: grid; gap: 14px; }
+.card.success {
+    border-color: #10b98155;
+}
+
+.form {
+    display: grid;
+    gap: 14px;
+}
 
 .grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
 }
-.grid .span2 { grid-column: span 2; }
+
+.grid .span2 {
+    grid-column: span 2;
+}
 
 @media (max-width: 720px) {
-  .grid { grid-template-columns: 1fr; }
-  .grid .span2 { grid-column: auto; }
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .grid .span2 {
+        grid-column: auto;
+    }
 }
 
 .field label {
-  display: block;
-  margin-bottom: 6px;
-  font-weight: 600;
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
 }
 
-input, select, textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1.5px solid var(--stroke);
-  background: var(--panel);
-  color: var(--text);
-  outline: none;
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1.5px solid var(--stroke);
+    background: var(--panel);
+    color: var(--text);
+    outline: none;
 }
 
-input:focus, select:focus, textarea:focus {
-  border-color: var(--brand);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 25%, transparent);
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--brand);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 25%, transparent);
 }
 
 /* Placeholders */
-input::placeholder { color: color-mix(in srgb, var(--text) 50%, transparent); }
-:root[data-theme="dark"] input::placeholder { color: color-mix(in srgb, var(--text) 35%, transparent); }
+input::placeholder {
+    color: color-mix(in srgb, var(--text) 50%, transparent);
+}
 
-/* Inline error text */
-.err { color: #ef4444; font-size: .9rem; }
+:root[data-theme="dark"] input::placeholder {
+    color: color-mix(in srgb, var(--text) 35%, transparent);
+}
 
-/* =========================
-   Buttons
-   ========================= */
-.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.err {
+    color: #ef4444;
+    font-size: .9rem;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+}
 
 .btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid var(--brand);
-  background: var(--brand);
-  color: white;
-  cursor: pointer;
-  font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--brand);
+    background: var(--brand);
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
 }
 
-.btn.ghost { background: transparent; color: var(--text); }
-.btn:disabled { opacity: .8; cursor: not-allowed; }
+.btn.ghost {
+    background: transparent;
+    color: var(--text);
+}
 
-.details { list-style: none; padding: 0; margin: 10px 0; }
-.muted { color: var(--muted); margin: 0 0 8px 0; }
+.btn:disabled {
+    opacity: .8;
+    cursor: not-allowed;
+}
 
-/* =========================
-   Date/Time addon buttons (calendar & clock)
-   ========================= */
-.with-addon { position: relative; }
+.details {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0;
+}
 
-/* Add room for the addon button on the right (except the hidden date input) */
-.with-addon input:not(.visually-hidden-input) { padding-right: 44px; }
+.muted {
+    color: var(--muted);
+    margin: 0 0 8px 0;
+}
 
-/* Hide default picker icons — we provide our own buttons */
+.with-addon {
+    position: relative;
+}
+
+.with-addon input:not(.visually-hidden-input) {
+    padding-right: 44px;
+}
+
 input[type="date"]::-webkit-calendar-picker-indicator,
-input[type="time"]::-webkit-calendar-picker-indicator { opacity: 0; }
-
-.addon-btn{
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 34px; height: 34px;
-  display: grid; place-items: center;
-  border-radius: 8px;
-  border: 1px solid var(--stroke);
-  background: var(--panel);
-  color: var(--muted);
-  cursor: pointer;
-  transition:
-    transform .12s ease,
-    filter .12s ease,
-    border-color .12s ease,
-    box-shadow .12s ease,
-    color .12s ease;
-}
-.addon-btn:hover{
-  transform: translateY(-50%) scale(1.03);
-  filter: brightness(1.05);
-  color: var(--text);
-}
-.with-addon:focus-within .addon-btn{
-  border-color: var(--brand);
-  color: var(--brand);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 22%, transparent);
-}
-:root[data-theme="dark"] .addon-btn{
-  background: color-mix(in srgb, var(--panel) 90%, black);
+input[type="time"]::-webkit-calendar-picker-indicator {
+    opacity: 0;
 }
 
-/* Addon icons are pre-tinted (no CSS filters to keep them crisp) */
-.addon-btn .addon-icon{
-  width: 18px;
-  height: 18px;
-  object-fit: contain;
-  pointer-events: none;
+.addon-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    border: 1px solid var(--stroke);
+    background: var(--panel);
+    color: var(--muted);
+    cursor: pointer;
+    transition:
+        transform .12s ease,
+        filter .12s ease,
+        border-color .12s ease,
+        box-shadow .12s ease,
+        color .12s ease;
 }
 
-/* Hidden native date input (used only to call showPicker) */
-.visually-hidden-input{
-  position:absolute;
-  width:1px; height:1px;
-  margin:-1px; border:0; padding:0;
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  overflow:hidden;
-  opacity:0;
-  pointer-events:none;
+.addon-btn:hover {
+    transform: translateY(-50%) scale(1.03);
+    filter: brightness(1.05);
+    color: var(--text);
 }
-.visually-hidden-input::-webkit-calendar-picker-indicator { display: none; }
 
-/* =========================
-   Restaurant typeahead (suggestions dropdown)
-   ========================= */
-.searchable { position: relative; }
-.combo-input { width: 100%; }
+.with-addon:focus-within .addon-btn {
+    border-color: var(--brand);
+    color: var(--brand);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 22%, transparent);
+}
 
-.suggestions{
-  position: absolute;
-  left: 0; right: 0;
-  top: calc(100% + 6px);
-  background: var(--panel);
-  border: 1.5px solid var(--stroke);
-  border-radius: 10px;
-  box-shadow: var(--shadow);
-  max-height: 240px;
-  overflow: auto;
-  z-index: 50;
+:root[data-theme="dark"] .addon-btn {
+    background: color-mix(in srgb, var(--panel) 90%, black);
 }
-.suggestions ul{ list-style: none; padding: 6px; margin: 0; }
-.suggestions li{
-  padding: 8px 10px;
-  border-radius: 8px;
-  cursor: pointer;
+
+.visually-hidden-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    border: 0;
+    padding: 0;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
 }
+
+.visually-hidden-input::-webkit-calendar-picker-indicator {
+    display: none;
+}
+
+.searchable {
+    position: relative;
+}
+
+.combo-input {
+    width: 100%;
+}
+
+.suggestions {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 6px);
+    background: var(--panel);
+    border: 1.5px solid var(--stroke);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    max-height: 240px;
+    overflow: auto;
+    z-index: 50;
+}
+
+.suggestions ul {
+    list-style: none;
+    padding: 6px;
+    margin: 0;
+}
+
+.suggestions li {
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
 .suggestions li:hover,
-.suggestions li[aria-selected="true"]{
-  background: color-mix(in srgb, var(--brand) 14%, transparent);
-}
-.suggestions .empty{
-  padding: 10px;
-  color: var(--muted);
-  cursor: default;
+.suggestions li[aria-selected="true"] {
+    background: color-mix(in srgb, var(--brand) 14%, transparent);
 }
 
-/* =========================
-   Time slots popover (always light for readability)
-   ========================= */
-:root {
-  --popover-bg: #ffffff;
-  --popover-text: #1b1f23;
-  --popover-border: #e5e7eb;
-  --popover-hover: #f3f4f6;
+.suggestions .empty {
+    padding: 10px;
+    color: var(--muted);
+    cursor: default;
 }
+
+.addon-btn .addon-icon {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+:root {
+    --popover-bg: #ffffff;
+    --popover-text: #1b1f23;
+    --popover-border: #e5e7eb;
+    --popover-hover: #f3f4f6;
+}
+
 :root[data-theme="dark"] {
-  /* keep popover white even in dark mode */
-  --popover-bg: #ffffff;
-  --popover-text: #1b1f23;
-  --popover-border: #e5e7eb;
-  --popover-hover: #f3f4f6;
+    --popover-bg: #ffffff;
+    --popover-text: #1b1f23;
+    --popover-border: #e5e7eb;
+    --popover-hover: #f3f4f6;
 }
 
 .popover {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 6px);
-  z-index: 60;
-  background: var(--popover-bg);
-  color: var(--popover-text);
-  border: 1.5px solid var(--popover-border);
-  border-radius: 10px;
-  box-shadow: var(--shadow);
-  padding: 8px;
-  max-height: 220px;
-  overflow: auto;
-  width: 220px;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    z-index: 60;
+    background: var(--popover-bg);
+    color: var(--popover-text);
+    border: 1.5px solid var(--popover-border);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 8px;
+    max-height: 220px;
+    overflow: auto;
+    width: 220px;
 }
+
 .popover .opt {
-  width: 100%;
-  padding: 8px 10px;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  text-align: left;
-  border-radius: 8px;
-  cursor: pointer;
-}
-.popover .opt:hover { background: var(--popover-hover); }
-
-/* =========================
-   Modal (ManageBooking)
-   ========================= */
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, .4);
-  display: grid;
-  place-items: center;
-  z-index: 100;
-}
-.dialog {
-  width: min(480px, 92vw);
-  background: var(--panel);
-  color: var(--text);
-  border: 1.5px solid var(--stroke);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-  padding: 16px;
+    width: 100%;
+    padding: 8px 10px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    border-radius: 8px;
+    cursor: pointer;
 }
 
-/* Selected item state inside popover */
-.popover .opt.selected { background: var(--popover-hover); }
-
-/* Inline checkbox (remember my details) */
-.field.checkbox label.inline {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-  font-weight: 500;
-}
-.field.checkbox input[type="checkbox"] {
-  inline-size: 16px;
-  block-size: 16px;
-  margin: 0;
-  accent-color: var(--brand);
+.popover .opt:hover {
+    background: var(--popover-hover);
 }
 
-/* =========================
-   Reduced motion
-   ========================= */
 @media (prefers-reduced-motion: reduce) {
-  .addon-btn { transition: none; }
+    .addon-btn {
+        transition: none;
+    }
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .4);
+    display: grid;
+    place-items: center;
+    z-index: 100;
+}
+
+.dialog {
+    width: min(480px, 92vw);
+    background: var(--panel);
+    color: var(--text);
+    border: 1.5px solid var(--stroke);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 16px;
+}
+
+.popover .opt.selected {
+    background: var(--popover-hover);
+}
+
+.field.checkbox label.inline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-weight: 500;
+}
+
+.field.checkbox input[type="checkbox"] {
+    inline-size: 16px;
+    block-size: 16px;
+    margin: 0;
+    accent-color: var(--brand);
+}
+
+/* ---------- App background images (day/night) ---------- */
+:root {
+    --bg-image: url('./back_day.jpg');
+    --bg-overlay: rgba(255, 255, 255, .20);
+}
+
+:root[data-theme="dark"] {
+    --bg-image: url('./back_night.jpg');
+    --bg-overlay: rgba(0, 0, 0, .40);
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background:
+        linear-gradient(0deg, var(--bg-overlay), var(--bg-overlay)),
+        var(--bg-image) center / cover no-repeat fixed;
+    background-color: var(--bg);
+}
+
+/* =========================================================
+   Advertising billboard (sidebar)
+   - vertical orientation
+   - auto-rotation
+   - translucent "advertising" badge
+   - hover overlay
+   - full-screen popup
+   ========================================================= */
+
+.sidebar .ad-board { margin-top: 16px; }
+
+.ad-board {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 9 / 16;              /* vertical orientation */
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid var(--stroke);
+    background: #000;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    isolation: isolate;                /* keep overlays separate */
+}
+
+/* Soft vignette overlay so text is legible on any image */
+.ad-board::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(90% 65% at 50% 35%, rgba(0,0,0,0) 40%, rgba(0,0,0,.25) 100%),
+        linear-gradient(180deg, rgba(0,0,0,.06) 0%, rgba(0,0,0,.35) 85%);
+    mix-blend-mode: normal;
+}
+
+.ad-stack {
+    position: absolute;
+    inset: 0;
+}
+
+.ad-frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    opacity: 0;
+    transform: scale(1.02);
+    transition: opacity .6s ease, transform .6s ease;
+    will-change: opacity, transform;
+}
+.ad-frame.active {
+    opacity: 1;
+    transform: scale(1);
+    animation: ad-zoom 7s ease-in-out both;
+}
+@keyframes ad-zoom {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.05); }
+}
+
+/* Badge — more transparent so it doesn't fight the image */
+.ad-tag {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #fff;
+    background: rgba(0, 0, 0, .28);        /* more transparent */
+    border: 1px solid color-mix(in srgb, #ffffff 35%, transparent);
+    border-radius: 999px;
+    backdrop-filter: blur(2px);
+    user-select: none;
+}
+
+/* Hover overlay with short tagline */
+.ad-hover {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: end start;
+    padding: 14px;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,.45) 100%);
+    color: #fff;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity .25s ease, transform .25s ease;
+    pointer-events: none;
+}
+.ad-board:hover .ad-hover {
+    opacity: 1;
+    transform: translateY(0);
+}
+.ad-hover-inner {
+    max-width: 85%;
+}
+.ad-title {
+    font-weight: 800;
+    font-size: 15px;
+    line-height: 1.15;
+    margin-bottom: 2px;
+}
+.ad-sub {
+    font-size: 12px;
+    opacity: .95;
+}
+
+/* Full-screen popup (reuses .modal overlay) */
+.ad-fullscreen {
+    width: min(920px, 92vw);
+    max-height: 86vh;
+    background: var(--panel);
+    color: var(--text);
+    border: 1.5px solid var(--stroke);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 24px;
+    position: relative;
+    overflow: auto;
+}
+.ad-fullscreen-content {
+    display: grid;
+    gap: 8px;
+    text-align: center;
+    padding: 24px 6px 6px;
+}
+.ad-fullscreen-content h1 {
+    margin: 0 0 6px 0;
+    font-size: clamp(28px, 4vw, 44px);
+    line-height: 1.12;
+}
+.ad-fullscreen-content p {
+    margin: 0;
+    color: var(--muted);
+    font-size: clamp(14px, 2vw, 16px);
+}
+
+.ad-close {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--stroke);
+    background: var(--panel);
+    color: var(--text);
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+/* Reduce motion-friendly */
+@media (prefers-reduced-motion: reduce) {
+    .ad-frame,
+    .ad-board .ad-hover {
+        transition: none;
+        animation: none;
+    }
 }
