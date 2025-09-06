@@ -1,4 +1,3 @@
-// App.jsx
 import { useEffect, useState } from "react";
 import BookingForm from "./components/BookingForm";
 import ManageBooking from "./components/ManageBooking";
@@ -25,7 +24,6 @@ export default function App() {
 
         <h1 className="brand">TableTime</h1>
         <p className="tag">Table reservation service</p>
-
         <PromoBillboard />
       </aside>
 
