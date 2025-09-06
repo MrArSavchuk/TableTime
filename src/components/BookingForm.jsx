@@ -1,15 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
-// Light/Dark icons for the date and time addon buttons.
 import calLight from "../assets/icon_cal_l.png";
 import calDark from "../assets/icon_cal_d.png";
 import clkLight from "../assets/icon_cloc_l.png";
 import clkDark from "../assets/icon_cloc_d.png";
 
-/* ────────────────────────────────────────────────────────────────────────────
-   Helpers
-   ──────────────────────────────────────────────────────────────────────────── */
+/* ───────────────── helpers ───────────────── */
 
 const maskDate = (v) => {
   const d = String(v || "").replace(/\D/g, "").slice(0, 8);
@@ -27,12 +24,6 @@ const fromISOtoMMDDYYYY = (iso) => {
   if (!iso || typeof iso !== "string" || !iso.includes("-")) return iso ?? "";
   const [y, m, d] = iso.split("-");
   return `${m}/${d}/${y}`;
-};
-
-const norm = (s) => {
-  const str = String(s ?? "");
-  const normalized = typeof str.normalize === "function" ? str.normalize("NFD") : str;
-  return normalized.toLowerCase().replace(/[\u0300-\u036f]/g, "").trim();
 };
 
 const parseMMDDYYYY = (s) => {
@@ -59,10 +50,12 @@ const FALLBACK_FULL = [
 const FALLBACK_MIN = [{ id: "any", name: "Any" }];
 
 function useTheme() {
-  const get = () => document.documentElement.getAttribute("data-theme") || "light";
+  const get = () => (typeof document !== "undefined"
+    ? document.documentElement.getAttribute("data-theme") || "light"
+    : "light");
   const [theme, setTheme] = useState(get);
   useEffect(() => {
-    if (typeof window.MutationObserver !== "function") return;
+    if (typeof window === "undefined" || !("MutationObserver" in window)) return;
     const el = document.documentElement;
     const obs = new MutationObserver(() => setTheme(get()));
     obs.observe(el, { attributes: true, attributeFilter: ["data-theme"] });
@@ -84,9 +77,7 @@ const safeUUID = () =>
     ? crypto.randomUUID()
     : Math.random().toString(36).slice(2);
 
-/* ────────────────────────────────────────────────────────────────────────────
-   Component
-   ──────────────────────────────────────────────────────────────────────────── */
+/* ───────────────── component ───────────────── */
 
 export default function BookingForm() {
   const theme = useTheme();
@@ -121,7 +112,7 @@ export default function BookingForm() {
     formState: { errors, isSubmitting },
   } = useForm({
     defaultValues: {
-      restaurant: "",
+      restaurant: "", // теперь это будет id выбранного ресторана
       date: "",
       time: "",
       guests: 2,
@@ -135,18 +126,15 @@ export default function BookingForm() {
   const [result, setResult] = useState(null);
   const [serverError, setServerError] = useState("");
 
-  const [openSuggest, setOpenSuggest] = useState(false);
-  const [hi, setHi] = useState(0);
-
   const [availableSlots, setAvailableSlots] = useState([]);
   const [showTimePanel, setShowTimePanel] = useState(false);
   const [hiTime, setHiTime] = useState(0);
 
   const timePanelRef = useRef(null);
   const dateNativeRef = useRef(null);
-  const timeRef = useRef(null);
 
-  const restaurantVal = watch("restaurant") || "";
+  const restaurantId = watch("restaurant"); // id ресторана
+  const dateVal = watch("date");
 
   const openDatePicker = () => {
     const el = dateNativeRef.current;
@@ -154,6 +142,7 @@ export default function BookingForm() {
     if (typeof el.showPicker === "function") el.showPicker(); else el.focus();
   };
 
+  // подгружаем список ресторанов (в проде это MSW)
   useEffect(() => {
     let cancelled = false;
     const load = async (retry = false) => {
@@ -170,6 +159,7 @@ export default function BookingForm() {
     return () => { cancelled = true; };
   }, []);
 
+  // min/max для родного date-picker’а
   useEffect(() => {
     const el = dateNativeRef.current;
     if (!el) return;
@@ -178,62 +168,40 @@ export default function BookingForm() {
     el.max = toISODate(maxDate);
   }, [today, maxDate]);
 
+  // слоты при валидной дате + выбранном ресторане
   useEffect(() => {
-    try {
-      const nm = localStorage.getItem("tt-name") || "";
-      const em = localStorage.getItem("tt-email") || "";
-      const rr = localStorage.getItem("tt-restaurant") || "";
-      if (nm) setValue("name", nm);
-      if (em) setValue("email", em);
-      if (rr) setValue("restaurant", rr, { shouldValidate: true });
-    } catch (e) {
-      console.warn("localStorage access skipped:", e);
-    }
-  }, [setValue]);
-
-  const isValidRestaurant = (value) =>
-    restaurants.some((r) => norm(r.name) === norm(value)) ||
-    "Select a restaurant from the list";
-
-  const dateVal = watch("date");
-  useEffect(() => {
-    const picked = restaurants.find((r) => norm(r.name) === norm(restaurantVal));
     const validDate =
       /^(0[1-9]|1[0-2])\/(0[1-9]|[12]\d|3[01])\/\d{4}$/.test(String(dateVal || "")) &&
       withinRange(dateVal);
 
-    if (!picked || !validDate) {
+    if (!restaurantId || !validDate) {
       setAvailableSlots([]);
       setShowTimePanel(false);
       return;
     }
 
     const iso = toISO(dateVal);
-    fetch(`/api/availability?restaurant=${encodeURIComponent(picked.id)}&date=${iso}`)
+    fetch(`/api/availability?restaurant=${encodeURIComponent(restaurantId)}&date=${iso}`)
       .then((r) => r.json())
       .then(({ slots }) => setAvailableSlots(Array.isArray(slots) ? slots : []))
       .catch(() => setAvailableSlots([]));
-  }, [restaurantVal, dateVal, restaurants]);
+  }, [restaurantId, dateVal]);
 
   const onSubmit = async (data) => {
     setServerError("");
     setResult(null);
     try {
-      const picked =
-        restaurants.find((r) => norm(r.name) === norm(data.restaurant)) ||
-        FALLBACK_MIN[0];
+      // найдём читаемое имя для подтверждения
+      const picked = restaurants.find((r) => String(r.id) === String(data.restaurant)) || restaurants[0];
 
       try {
-        const remember = true; // keep previous behavior: remember by default
-        localStorage.setItem("tt-remember", remember ? "1" : "0");
-        if (remember) {
-          localStorage.setItem("tt-name", data.name || "");
-          localStorage.setItem("tt-email", data.email || "");
-          localStorage.setItem("tt-restaurant", data.restaurant || "");
-        }
+        localStorage.setItem("tt-remember", "1");
+        localStorage.setItem("tt-name", data.name || "");
+        localStorage.setItem("tt-email", data.email || "");
+        localStorage.setItem("tt-restaurant", picked?.name || "");
       } catch {}
 
-      const payload = { ...data, restaurant: picked.id, date: toISO(data.date) };
+      const payload = { ...data, date: toISO(data.date) };
 
       const res = await fetch("/api/bookings", {
         method: "POST",
@@ -252,7 +220,11 @@ export default function BookingForm() {
       }
 
       const booking = await res.json();
-      setResult({ ...booking, displayDate: data.date, restaurantName: picked.name });
+      setResult({
+        ...booking,
+        displayDate: data.date,
+        restaurantName: picked?.name || "Restaurant",
+      });
     } catch (e) {
       setServerError(e.message || String(e));
     }
@@ -284,6 +256,7 @@ export default function BookingForm() {
     URL.revokeObjectURL(url);
   };
 
+  /* ───── success screen ───── */
   if (result) {
     const gcal = (() => {
       const { start, end } = toCalDT(result.date, result.time, 90);
@@ -326,23 +299,15 @@ export default function BookingForm() {
           >
             Add to Calendar (.ics)
           </button>
-
           <a className="btn ghost" href={gcal} target="_blank" rel="noopener noreferrer">
             Add to Google Calendar
           </a>
-
-          <button
-            type="button"
-            className="btn ghost"
-            onClick={() => { try { navigator.clipboard?.writeText(result.code); } catch {} }}
-          >
+          <button type="button" className="btn ghost" onClick={() => { try { navigator.clipboard?.writeText(result.code); } catch {} }}>
             Copy code
           </button>
-
           <button type="button" className="btn ghost" onClick={() => window.print()}>
             Print
           </button>
-
           <button className="btn" onClick={() => { setResult(null); reset(); }}>
             Make another booking
           </button>
@@ -351,7 +316,7 @@ export default function BookingForm() {
     );
   }
 
-  const restaurantReg = register("restaurant", { required: true, validate: isValidRestaurant });
+  /* ───── form ───── */
   const dateReg = register("date", {
     required: "Use MM/DD/YYYY",
     validate: (v) =>
@@ -360,18 +325,8 @@ export default function BookingForm() {
   });
   const timeReg = register("time", {
     required: "Pick a time",
-    validate: (v) =>
-      availableSlots.length === 0 || availableSlots.includes(v) || "Pick an available time",
+    validate: (v) => availableSlots.length === 0 || availableSlots.includes(v) || "Pick an available time",
   });
-
-  const filtered = restaurants.filter((r) => norm(r.name).includes(norm(restaurantVal)));
-
-  useEffect(() => {
-    if (showTimePanel && timePanelRef.current) {
-      setHiTime(0);
-      timePanelRef.current.focus();
-    }
-  }, [showTimePanel]);
 
   return (
     <section className="card">
@@ -385,71 +340,25 @@ export default function BookingForm() {
 
       <form className="form" onSubmit={submitRHF(onSubmit)} noValidate>
         <div className="grid">
-          {/* Restaurant */}
-          <div className="field searchable">
+          {/* Restaurant — простой и надёжный <select> */}
+          <div className="field">
             <label htmlFor="restaurant">Restaurant</label>
-            <input
+            <select
               id="restaurant"
-              className="combo-input"
-              placeholder="Choose or type to search…"
-              {...restaurantReg}
-              // больше НЕ задаём value вручную — работаем через RHF + watch
-              onFocus={() => { setOpenSuggest(true); setHi(0); }}
+              {...register("restaurant", { required: true })}
               onChange={(e) => {
-                restaurantReg.onChange(e);
-                setOpenSuggest(true);
-                setHi(0);
+                // RHF обработает value сам, но мы подчистим time/slots при смене ресторана
+                setValue("time", "");
+                setShowTimePanel(false);
+                setHiTime(0);
               }}
-              onKeyDown={(e) => {
-                if (!openSuggest || filtered.length === 0) return;
-                if (e.key === "ArrowDown") { e.preventDefault(); setHi((i) => Math.min(i + 1, filtered.length - 1)); }
-                if (e.key === "ArrowUp") { e.preventDefault(); setHi((i) => Math.max(i - 1, 0)); }
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  const pick = filtered[hi];
-                  if (pick) {
-                    setValue("restaurant", pick.name, { shouldValidate: true });
-                    setOpenSuggest(false);
-                  }
-                }
-                if (e.key === "Escape") setOpenSuggest(false);
-              }}
-              onBlur={() => setTimeout(() => setOpenSuggest(false), 120)}
-            />
-
-            {openSuggest && (
-              <div
-                id="restaurant-suggestions"
-                className="suggestions"
-                role="listbox"
-                aria-label="Restaurant suggestions"
-              >
-                {filtered.length ? (
-                  <ul>
-                    {filtered.map((r, i) => (
-                      <li
-                        key={r.id}
-                        role="option"
-                        aria-selected={i === hi ? "true" : "false"}
-                        onMouseDown={() => {
-                          setValue("restaurant", r.name, { shouldValidate: true });
-                          setOpenSuggest(false);
-                        }}
-                        onMouseEnter={() => setHi(i)}
-                      >
-                        {r.name}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <div className="empty">No matches</div>
-                )}
-              </div>
-            )}
-
-            {errors.restaurant && (
-              <span className="err">{String(errors.restaurant.message || "Select from list")}</span>
-            )}
+            >
+              <option value="" disabled>Select a restaurant…</option>
+              {restaurants.map((r) => (
+                <option key={r.id} value={r.id}>{r.name}</option>
+              ))}
+            </select>
+            {errors.restaurant && <span className="err">Select a restaurant</span>}
           </div>
 
           {/* Guests */}
@@ -471,10 +380,7 @@ export default function BookingForm() {
               inputMode="numeric"
               placeholder="MM/DD/YYYY"
               {...dateReg}
-              onChange={(e) => {
-                const masked = maskDate(e.target.value);
-                setValue("date", masked, { shouldValidate: true });
-              }}
+              onChange={(e) => setValue("date", maskDate(e.target.value), { shouldValidate: true })}
             />
             <input
               type="date"
@@ -484,17 +390,10 @@ export default function BookingForm() {
                 const iso = e.target.value;
                 if (!iso) return;
                 const [y, m, d] = iso.split("-");
-                const mmddyyyy = `${m}/${d}/${y}`;
-                setValue("date", mmddyyyy, { shouldValidate: true, shouldDirty: true });
+                setValue("date", `${m}/${d}/${y}`, { shouldValidate: true, shouldDirty: true });
               }}
             />
-            <button
-              type="button"
-              className="addon-btn"
-              aria-label="Open date picker"
-              title="Open date picker"
-              onClick={openDatePicker}
-            >
+            <button type="button" className="addon-btn" aria-label="Open date picker" title="Open date picker" onClick={openDatePicker}>
               <img src={calIcon} alt="" className="addon-icon" />
             </button>
             {errors.date && <span className="err">{errors.date.message}</span>}
@@ -503,7 +402,7 @@ export default function BookingForm() {
             </p>
           </div>
 
-          {/* Time */}
+          {/* Time + поповер со слотами (остался прежним) */}
           <div className="field with-addon">
             <label htmlFor="time">Time</label>
             <input
@@ -511,25 +410,16 @@ export default function BookingForm() {
               type="time"
               lang="en-US"
               {...timeReg}
-              ref={(el) => { timeReg.ref(el); timeRef.current = el; }}
               onFocus={() => availableSlots.length && setShowTimePanel(true)}
               onBlur={() => setTimeout(() => setShowTimePanel(false), 120)}
             />
-            <button
-              type="button"
-              className="addon-btn"
-              aria-label="Open time options"
-              title="Open time options"
-              onClick={() => setShowTimePanel((v) => !v)}
-            >
+            <button type="button" className="addon-btn" aria-label="Open time options" title="Open time options" onClick={() => setShowTimePanel((v) => !v)}>
               <img src={timeIcon} alt="" className="addon-icon" />
             </button>
 
             <p className="muted" style={{ marginTop: 6 }}>
-              {dateVal && restaurantVal && availableSlots.length > 0 &&
-                `${availableSlots.length} slots available`}{" "}
-              {dateVal && restaurantVal && availableSlots.length === 0 &&
-                "No available slots for this date"}{" "}
+              {dateVal && restaurantId && availableSlots.length > 0 && `${availableSlots.length} slots available`}{" "}
+              {dateVal && restaurantId && availableSlots.length === 0 && "No available slots for this date"}{" "}
               • Times shown in {timeZone}.
             </p>
 
@@ -546,10 +436,7 @@ export default function BookingForm() {
                   if (e.key === "Enter") {
                     e.preventDefault();
                     const t = availableSlots[hiTime];
-                    if (t) {
-                      setValue("time", t, { shouldValidate: true, shouldDirty: true });
-                      setShowTimePanel(false);
-                    }
+                    if (t) { setValue("time", t, { shouldValidate: true, shouldDirty: true }); setShowTimePanel(false); }
                   }
                   if (e.key === "Escape") setShowTimePanel(false);
                 }}
@@ -559,10 +446,7 @@ export default function BookingForm() {
                     key={t}
                     type="button"
                     className={`opt${i === hiTime ? " selected" : ""}`}
-                    onMouseDown={() => {
-                      setValue("time", t, { shouldValidate: true, shouldDirty: true });
-                      setShowTimePanel(false);
-                    }}
+                    onMouseDown={() => { setValue("time", t, { shouldValidate: true, shouldDirty: true }); setShowTimePanel(false); }}
                     onMouseEnter={() => setHiTime(i)}
                     aria-selected={i === hiTime}
                   >
