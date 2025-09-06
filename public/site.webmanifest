@@ -2,8 +2,7 @@
   "name": "TableTime",
   "short_name": "TableTime",
   "icons": [
-    { "src": "/icons/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/icons/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png" }
+    { "src": "/restaurant-favicon.ico", "sizes": "any", "type": "image/x-icon" }
   ],
   "theme_color": "#659DBD",
   "background_color": "#ffffff",

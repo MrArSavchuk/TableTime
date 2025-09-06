@@ -180,34 +180,22 @@ export default function BookingForm() {
     if (typeof el.showPicker === "function") el.showPicker(); else el.focus();
   };
 
-  // Load restaurants from API (MSW in dev). Fallback remains if request fails.
+  // Load restaurants once. If MSW is still starting, do one quick retry after 0.5s.
   useEffect(() => {
-    let alive = true;
-    fetch("/api/restaurants")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((list) => {
-        if (!alive || !Array.isArray(list) || list.length === 0) return;
-        setRestaurants(list);
-      })
-      .catch(() => { /* keep fallback silently */ });
-    return () => { alive = false; };
+    let cancelled = false;
+    const load = async (retry = false) => {
+      try {
+        const r = await fetch("/api/restaurants");
+        if (!r.ok) throw new Error("not ok");
+        const list = await r.json();
+        if (!cancelled && Array.isArray(list) && list.length) setRestaurants(list);
+      } catch {
+        if (!retry) setTimeout(() => load(true), 500); // one retry after 0.5s
+      }
+    };
+    load();
+    return () => { cancelled = true; };
   }, []);
-
-  useEffect(() => {
-  let cancelled = false;
-  const load = async (retry = false) => {
-    try {
-      const r = await fetch("/api/restaurants");
-      if (!r.ok) throw new Error("not ok");
-      const list = await r.json();
-      if (!cancelled && Array.isArray(list) && list.length) setRestaurants(list);
-    } catch {
-      if (!retry) setTimeout(() => load(true), 500); // один повтор через 0.5с
-    }
-  };
-  load();
-  return () => { cancelled = true; };
-}, []);
 
   // Configure min/max for native <input type="date"> to enforce range in UI.
   useEffect(() => {
