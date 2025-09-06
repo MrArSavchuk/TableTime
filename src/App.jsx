@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import BookingForm from "./components/BookingForm";
 import ManageBooking from "./components/ManageBooking";
-import PromoBillboard from "./components/PromoBillboard";
+import AdBoard from "./components/AdBoard"; 
+import "./styles.css";
 
 export default function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem("tt-theme") || "dark");
@@ -24,7 +25,7 @@ export default function App() {
         <h1 className="brand">TableTime</h1>
         <p className="tag">Table reservation service</p>
 
-        <PromoBillboard />
+        <AdBoard />
       </aside>
 
       <main className="main">
