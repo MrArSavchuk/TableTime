@@ -1,25 +1,25 @@
-import React, { Component } from "react";
+import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
 import "./styles.css";
 
-class RootErrorBoundary extends Component {
+class RootErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { err: null };
+    this.state = { error: null };
   }
-  static getDerivedStateFromError(err) { return { err }; }
-  componentDidCatch(err, info) {
-    console.error("Root error boundary caught:", err, info);
+  static getDerivedStateFromError(err) {
+    return { error: err };
+  }
+  componentDidCatch(error, info) {
+    console.error("Root error boundary caught:", error, info?.componentStack);
   }
   render() {
-    if (this.state.err) {
+    if (this.state.error) {
       return (
-        <div style={{ padding: 24 }}>
+        <div style={{ padding: 16, color: "white" }}>
           <h2>Something went wrong</h2>
-          <p className="muted">
-            The app hit a runtime error. Please reload the page. Check console for details.
-          </p>
+          <p className="muted">The app hit a runtime error. Check the console for details.</p>
         </div>
       );
     }
@@ -27,23 +27,27 @@ class RootErrorBoundary extends Component {
   }
 }
 
-async function bootstrap() {
-  const enableMSW =
+async function enableMocksIfNeeded() {
+  const enabled =
     import.meta.env.DEV ||
     String(import.meta.env.VITE_ENABLE_MSW).toLowerCase() === "true";
 
-  if (enableMSW) {
-    try {
-      const { worker } = await import("./mocks/browser");
-      await worker.start({
-        serviceWorker: { url: import.meta.env.BASE_URL + "mockServiceWorker.js" },
-        onUnhandledRequest: "bypass",
-      });
-      console.info("[MSW] Mocking enabled.");
-    } catch (e) {
-      console.warn("MSW failed to start (app keeps working):", e);
-    }
+  if (!enabled) return;
+
+  try {
+    const { worker } = await import("./mocks/browser");
+    await worker.start({
+      serviceWorker: { url: import.meta.env.BASE_URL + "mockServiceWorker.js" },
+      onUnhandledRequest: "bypass",
+    });
+    await new Promise((r) => setTimeout(r, 50));
+  } catch (e) {
+    console.warn("MSW failed to start (app keeps working):", e);
   }
+}
+
+(async () => {
+  await enableMocksIfNeeded();
 
   const root = ReactDOM.createRoot(document.getElementById("root"));
   root.render(
@@ -53,6 +57,4 @@ async function bootstrap() {
       </RootErrorBoundary>
     </React.StrictMode>
   );
-}
-
-bootstrap();
+})();
