@@ -1,68 +1,78 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
-// Картинки лежат в src/assets
-const ADS = [
-  new URL("../assets/ad_billboard.jpg", import.meta.url).href,
-  new URL("../assets/ad_billboard_two.jpg", import.meta.url).href,
-  new URL("../assets/ad_billboard_three.jpg", import.meta.url).href,
-];
+import ad1 from "../assets/ad_billboard.jpg";
+import ad2 from "../assets/ad_billboard_two.jpg";
+import ad3 from "../assets/ad_billboard_three.jpg";
 
 export default function PromoBillboard() {
+  const ads = useMemo(
+    () => [
+      {
+        img: ad1,
+        title: "ACME Tools",
+        sub: "Premium gear for kitchen & backyard.",
+      },
+      {
+        img: ad2,
+        title: "Coffee Roasters",
+        sub: "Small-batch beans. Big aroma.",
+      },
+      {
+        img: ad3,
+        title: "Green Market",
+        sub: "Local produce. Fresh every day.",
+      },
+    ],
+    []
+  );
+
   const [idx, setIdx] = useState(0);
   const [open, setOpen] = useState(false);
 
-  // Автосмена
   useEffect(() => {
-    const id = setInterval(() => {
-      setIdx((i) => (i + 1) % ADS.length);
-    }, 6000);
-    return () => clearInterval(id);
-  }, []);
+    const t = setInterval(() => {
+      setIdx((i) => (i + 1) % ads.length);
+    }, 7000);
+    return () => clearInterval(t);
+  }, [ads.length]);
 
   return (
     <>
-      {/* Fallback: фоновая картинка на контейнере */}
-      <div
-        className="ad-board"
-        onClick={() => setOpen(true)}
-        style={{
-          backgroundImage: `url(${ADS[idx]})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        {/* Кроссфейд через img-слои */}
-        <div className="ad-stack" aria-hidden="true">
-          {ADS.map((src, i) => (
+      <div className="ad-board" onClick={() => setOpen(true)} aria-label="Open promo">
+        <div className="ad-stack">
+          {ads.map((a, i) => (
             <img
-              key={src}
-              src={src}
+              key={i}
+              src={a.img}
               alt=""
               className={`ad-frame ${i === idx ? "active" : ""}`}
-              loading="eager"
+              draggable="false"
             />
           ))}
         </div>
 
-        <span className="ad-tag">advertising</span>
+        <div className="ad-tag">Advertising</div>
 
         <div className="ad-hover">
           <div className="ad-hover-inner">
-            <div className="ad-title">Your Brand Here</div>
-            <div className="ad-sub">Simple tagline about a great product.</div>
+            <div className="ad-title">{ads[idx].title}</div>
+            <div className="ad-sub">{ads[idx].sub}</div>
           </div>
         </div>
       </div>
 
       {open && (
-        <div className="modal" role="dialog" aria-modal="true" onClick={() => setOpen(false)}>
+        <div className="modal" onClick={() => setOpen(false)} role="dialog" aria-modal="true">
           <div className="ad-fullscreen" onClick={(e) => e.stopPropagation()}>
             <button className="ad-close" onClick={() => setOpen(false)} aria-label="Close">
               ✕
             </button>
             <div className="ad-fullscreen-content">
-              <h1>This could be your ad</h1>
-              <p>Reach thousands of hungry users. Contact us to place your brand here.</p>
+              <h1>Here could be your advertising</h1>
+              <p>
+                This is a placeholder. Provide a banner, a short pitch, a call-to-action
+                and a link — we’ll wire it up.
+              </p>
             </div>
           </div>
         </div>

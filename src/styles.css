@@ -339,33 +339,21 @@ body::before {
 .ad-board {
   position: relative;
   width: 100%;
-  aspect-ratio: 9 / 16;     /* вертикальная ориентация */
+  aspect-ratio: 9 / 16;                /* вертикальная ориентация */
   border-radius: 14px;
   overflow: hidden;
   border: 1px solid var(--stroke);
   background: #000;
   box-shadow: var(--shadow);
   cursor: pointer;
-  isolation: isolate;       /* собственный стек слоёв */
+  isolation: isolate;                   /* свой стек слоёв */
 }
 
 /* Слой с изображениями — самый нижний */
 .ad-stack {
   position: absolute;
   inset: 0;
-  z-index: 0;
-}
-
-/* Виньетка: над картинками, но под текстом */
-.ad-board::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;               /* <— ключевое */
-  pointer-events: none;
-  background:
-    radial-gradient(90% 65% at 50% 35%, rgba(0,0,0,0) 40%, rgba(0,0,0,.25) 100%),
-    linear-gradient(180deg, rgba(0,0,0,.06) 0%, rgba(0,0,0,.35) 85%);
+  z-index: 0;                           /* ↓ виньетка и ↑ текст */
 }
 
 .ad-frame {
@@ -387,10 +375,22 @@ body::before {
 }
 @keyframes ad-zoom { 0% {transform:scale(1);} 100% {transform:scale(1.05);} }
 
-/* Бейдж и оверлей — поверх всего */
+/* Виньетка — над изображениями, но под текстом */
+.ad-board::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;                           /* ключевое: ниже бейджа/оверлея */
+  pointer-events: none;
+  background:
+    radial-gradient(90% 65% at 50% 35%, rgba(0,0,0,0) 40%, rgba(0,0,0,.25) 100%),
+    linear-gradient(180deg, rgba(0,0,0,.06) 0%, rgba(0,0,0,.35) 85%);
+}
+
+/* Бейдж — поверх виньетки */
 .ad-tag {
   position: absolute;
-  z-index: 2;               /* <— поверх виньетки */
+  z-index: 2;
   left: 12px;
   top: 12px;
   padding: 6px 10px;
@@ -399,17 +399,18 @@ body::before {
   text-transform: uppercase;
   letter-spacing: .08em;
   color: #fff;
-  background: rgba(0, 0, 0, .28);
+  background: rgba(0, 0, 0, .28);        /* более прозрачный фон */
   border: 1px solid color-mix(in srgb, #ffffff 35%, transparent);
   border-radius: 999px;
   backdrop-filter: blur(2px);
   user-select: none;
 }
 
+/* Ховер-оверлей — тоже поверх виньетки */
 .ad-hover {
   position: absolute;
   inset: 0;
-  z-index: 2;               /* <— поверх виньетки */
+  z-index: 2;
   display: grid;
   place-items: end start;
   padding: 14px;
@@ -418,16 +419,68 @@ body::before {
   opacity: 0;
   transform: translateY(6px);
   transition: opacity .25s ease, transform .25s ease;
-  pointer-events: none;     /* только визуальный слой */
+  pointer-events: none;                 /* только визуальный слой */
 }
 .ad-board:hover .ad-hover {
   opacity: 1;
   transform: translateY(0);
 }
-
 .ad-hover-inner { max-width: 85%; }
 .ad-title { font-weight: 800; font-size: 15px; line-height: 1.15; margin-bottom: 2px; }
 .ad-sub   { font-size: 12px; opacity: .95; }
+
+/* Попап */
+.ad-fullscreen {
+  width: min(920px, 92vw);
+  max-height: 86vh;
+  background: var(--panel);
+  color: var(--text);
+  border: 1.5px solid var(--stroke);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 24px;
+  position: relative;
+  overflow: auto;
+}
+.ad-fullscreen-content {
+  display: grid;
+  gap: 8px;
+  text-align: center;
+  padding: 24px 6px 6px;
+}
+.ad-fullscreen-content h1 {
+  margin: 0 0 6px;
+  font-size: clamp(28px, 4vw, 44px);
+  line-height: 1.12;
+}
+.ad-fullscreen-content p {
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(14px, 2vw, 16px);
+}
+.ad-close {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--stroke);
+  background: var(--panel);
+  color: var(--text);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+/* Touch-fallback: на устройствах без hover показываем подсказку всегда */
+@media (hover: none) {
+  .ad-board .ad-hover {
+    opacity: 1;
+    transform: none;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,.35) 100%);
+  }
+}
 /* reduce-motion */
 @media (prefers-reduced-motion: reduce) {
   .ad-frame, .ad-board .ad-hover { transition: none; animation: none; }
