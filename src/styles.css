@@ -1,3 +1,6 @@
+/* =========================
+   Theme tokens
+   ========================= */
 :root {
   --bg: #fafafa;
   --panel: #ffffff;
@@ -7,10 +10,6 @@
   --accent: #DAAD86;
   --stroke: #e5e7eb;
   --shadow: 0 12px 30px rgba(0, 0, 0, .12);
-
-  /* фон приложения (день по умолчанию) */
-  --bg-image: url('/back_day.jpg');
-  --bg-overlay: rgba(255, 255, 255, .20);
 }
 
 :root[data-theme="dark"] {
@@ -20,14 +19,12 @@
   --muted: #9aa5b1;
   --stroke: #2a2f36;
   --shadow: 0 12px 30px rgba(0, 0, 0, .35);
-
-  /* фон приложения (ночь) */
-  --bg-image: url('/back_night.jpg');
-  --bg-overlay: rgba(0, 0, 0, .40);
 }
 
+/* =========================
+   Base
+   ========================= */
 * { box-sizing: border-box; }
-
 html, body, #root { height: 100%; }
 
 body {
@@ -37,18 +34,9 @@ body {
   font-family: system-ui, -apple-system, Segoe UI, Roboto, "Liberation Sans", Arial;
 }
 
-/* фон с картинкой под всем приложением */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background:
-    linear-gradient(0deg, var(--bg-overlay), var(--bg-overlay)),
-    var(--bg-image) center / cover no-repeat fixed;
-  background-color: var(--bg);
-}
-
+/* =========================
+   Layout
+   ========================= */
 .shell {
   display: grid;
   grid-template-columns: 280px minmax(720px, 1fr);
@@ -89,6 +77,9 @@ body::before {
 }
 .main > .card { width: 100%; }
 
+/* =========================
+   Cards / Forms
+   ========================= */
 .card {
   background: var(--panel);
   border: 1px solid var(--stroke);
@@ -117,6 +108,7 @@ body::before {
   font-weight: 600;
 }
 
+/* Inputs */
 input, select, textarea {
   width: 100%;
   padding: 10px 12px;
@@ -133,9 +125,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* Placeholders */
-input::placeholder {
-  color: color-mix(in srgb, var(--text) 50%, transparent);
-}
+input::placeholder { color: color-mix(in srgb, var(--text) 50%, transparent); }
 :root[data-theme="dark"] input::placeholder {
   color: color-mix(in srgb, var(--text) 35%, transparent);
 }
@@ -162,6 +152,7 @@ input::placeholder {
 .details { list-style: none; padding: 0; margin: 10px 0; }
 .muted { color: var(--muted); margin: 0 0 8px 0; }
 
+/* Addon icon button in inputs */
 .with-addon { position: relative; }
 .with-addon input:not(.visually-hidden-input) { padding-right: 44px; }
 
@@ -203,6 +194,14 @@ input[type="time"]::-webkit-calendar-picker-indicator { opacity: 0; }
   background: color-mix(in srgb, var(--panel) 90%, black);
 }
 
+.addon-btn .addon-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* Hidden native date input used only to showPicker */
 .visually-hidden-input {
   position: absolute;
   width: 1px;
@@ -218,6 +217,7 @@ input[type="time"]::-webkit-calendar-picker-indicator { opacity: 0; }
 }
 .visually-hidden-input::-webkit-calendar-picker-indicator { display: none; }
 
+/* Typeahead */
 .searchable { position: relative; }
 .combo-input { width: 100%; }
 
@@ -244,18 +244,11 @@ input[type="time"]::-webkit-calendar-picker-indicator { opacity: 0; }
 .suggestions li[aria-selected="true"] {
   background: color-mix(in srgb, var(--brand) 14%, transparent);
 }
-.suggestions .empty {
-  padding: 10px;
-  color: var(--muted);
-  cursor: default;
-}
-.addon-btn .addon-icon {
-  width: 18px;
-  height: 18px;
-  object-fit: contain;
-  pointer-events: none;
-}
+.suggestions .empty { padding: 10px; color: var(--muted); cursor: default; }
 
+/* =========================
+   Popovers / Modal
+   ========================= */
 :root {
   --popover-bg: #ffffff;
   --popover-text: #1b1f23;
@@ -295,8 +288,7 @@ input[type="time"]::-webkit-calendar-picker-indicator { opacity: 0; }
   cursor: pointer;
 }
 .popover .opt:hover { background: var(--popover-hover); }
-
-@media (prefers-reduced-motion: reduce) { .addon-btn { transition: none; } }
+.popover .opt.selected { background: var(--popover-hover); }
 
 .modal {
   position: fixed;
@@ -306,6 +298,7 @@ input[type="time"]::-webkit-calendar-picker-indicator { opacity: 0; }
   place-items: center;
   z-index: 100;
 }
+
 .dialog {
   width: min(480px, 92vw);
   background: var(--panel);
@@ -315,8 +308,8 @@ input[type="time"]::-webkit-calendar-picker-indicator { opacity: 0; }
   box-shadow: var(--shadow);
   padding: 16px;
 }
-.popover .opt.selected { background: var(--popover-hover); }
 
+/* Checkbox pretty */
 .field.checkbox label.inline {
   display: flex;
   align-items: center;
@@ -331,37 +324,55 @@ input[type="time"]::-webkit-calendar-picker-indicator { opacity: 0; }
   accent-color: var(--brand);
 }
 
-/* ===== Рекламный билборд в сайдбаре ===== */
+/* =========================
+   Page background (day/night)
+   ========================= */
+/* Файлы лежат в /public → абсолютный путь */
+:root {
+  --bg-image: url('/back_day.jpg');
+  --bg-overlay: rgba(255, 255, 255, .20);
+}
+:root[data-theme="dark"] {
+  --bg-image: url('/back_night.jpg');
+  --bg-overlay: rgba(0, 0, 0, .40);
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(0deg, var(--bg-overlay), var(--bg-overlay)),
+    var(--bg-image) center / cover no-repeat fixed;
+  background-color: var(--bg);
+}
 
+/* =========================
+   Advertising billboard
+   ========================= */
+/* Вставляется в .sidebar после шапки */
 .sidebar .ad-board { margin-top: 16px; }
 
 .ad-board {
   position: relative;
   width: 100%;
-  aspect-ratio: 9 / 16;                 /* вертикальная ориентация */
+  aspect-ratio: 9 / 16;                     /* вертикальная ориентация */
   border-radius: 14px;
   overflow: hidden;
   border: 1px solid var(--stroke);
-
-  /* фон из CSS-переменной — задаётся инлайново style="--ad-bg: url('...')" */
   background-color: #000;
+  /* фон для быстрого показа кадра из React через CSS-переменную */
   background-image: var(--ad-bg);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-
   box-shadow: var(--shadow);
   cursor: pointer;
-  isolation: isolate;                   /* свой стек слоёв */
+  isolation: isolate;                        /* свой стек слоёв */
 }
 
-/* Слой с изображениями для плавного фейда — самый нижний */
-.ad-stack {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-}
-.ad-stack img { display: block; }
+/* Слой со стеком изображений — низ стека */
+.ad-stack { position: absolute; inset: 0; z-index: 0; }
 
 .ad-frame {
   position: absolute;
@@ -382,22 +393,22 @@ input[type="time"]::-webkit-calendar-picker-indicator { opacity: 0; }
 }
 @keyframes ad-zoom { 0% {transform:scale(1);} 100% {transform:scale(1.05);} }
 
-/* Виньетка поверх изображений, но под текстом */
+/* Виньетка — над изображениями, но ниже текста */
 .ad-board::after {
   content: "";
   position: absolute;
   inset: 0;
-  z-index: 1;                           /* ниже бейджа и ховер-текста */
+  z-index: 1;                                /* текст идёт выше */
   pointer-events: none;
   background:
     radial-gradient(90% 65% at 50% 35%, rgba(0,0,0,0) 40%, rgba(0,0,0,.25) 100%),
     linear-gradient(180deg, rgba(0,0,0,.06) 0%, rgba(0,0,0,.35) 85%);
 }
 
-/* Бейдж «Advertising» */
+/* Бейдж “Advertising” — поверх виньетки */
 .ad-tag {
   position: absolute;
-  z-index: 2;
+  z-index: 3;
   left: 12px;
   top: 12px;
   padding: 6px 10px;
@@ -413,11 +424,11 @@ input[type="time"]::-webkit-calendar-picker-indicator { opacity: 0; }
   user-select: none;
 }
 
-/* Ховер-оверлей с заголовком и подписью */
+/* Ховер-подложка с заголовком и подписью */
 .ad-hover {
   position: absolute;
+  z-index: 3;                                /* поверх виньетки */
   inset: 0;
-  z-index: 2;
   display: grid;
   place-items: end start;
   padding: 14px;
@@ -426,17 +437,15 @@ input[type="time"]::-webkit-calendar-picker-indicator { opacity: 0; }
   opacity: 0;
   transform: translateY(6px);
   transition: opacity .25s ease, transform .25s ease;
-  pointer-events: none;
+  pointer-events: none;                      /* только визуальный слой */
 }
-.ad-board:hover .ad-hover {
-  opacity: 1;
-  transform: translateY(0);
-}
+.ad-board:hover .ad-hover { opacity: 1; transform: translateY(0); }
+
 .ad-hover-inner { max-width: 85%; }
 .ad-title { font-weight: 800; font-size: 15px; line-height: 1.15; margin-bottom: 2px; }
 .ad-sub   { font-size: 12px; opacity: .95; }
 
-/* Попап полноэкранный (использует .modal) */
+/* Fullscreen popup for ad */
 .ad-fullscreen {
   width: min(920px, 92vw);
   max-height: 86vh;
@@ -480,8 +489,11 @@ input[type="time"]::-webkit-calendar-picker-indicator { opacity: 0; }
   cursor: pointer;
 }
 
-/* Touch-fallback: всегда показывать подпись */
+/* =========================
+   A11y / Motion
+   ========================= */
 @media (hover: none) {
+  /* На тач-устройствах подсказку показываем всегда */
   .ad-board .ad-hover {
     opacity: 1;
     transform: none;
@@ -489,7 +501,6 @@ input[type="time"]::-webkit-calendar-picker-indicator { opacity: 0; }
   }
 }
 
-/* reduce-motion */
 @media (prefers-reduced-motion: reduce) {
   .addon-btn,
   .ad-frame,

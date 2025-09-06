@@ -17,49 +17,38 @@ export default function PromoBillboard() {
   const [idx, setIdx] = useState(0);
   const [open, setOpen] = useState(false);
 
-  // Автопереключение
   useEffect(() => {
-    const t = setInterval(() => setIdx(i => (i + 1) % ads.length), 7000);
+    const t = setInterval(() => setIdx((i) => (i + 1) % ads.length), 7000);
     return () => clearInterval(t);
   }, [ads.length]);
 
-  // Предзагрузка для плавности
-  useEffect(() => {
-    ads.forEach(({ img }) => { const i = new Image(); i.src = img; });
-  }, [ads]);
-
-  const currentImg = ads[idx].img;
-
   return (
     <>
-      {/* Передаём текущий фон НЕ через backgroundImage,
-          а через CSS-переменную (надёжно и не конфликтует
-          с шортхэндом background в стилях) */}
+      {/* ВАЖНО: прокидываем фон через --ad-bg */}
       <div
         className="ad-board"
+        style={{ "--ad-bg": `url(${ads[idx].img})` }}
         onClick={() => setOpen(true)}
         aria-label="Open promo"
-        style={{ "--ad-bg": `url("${currentImg}")` }}
       >
-        {/* Слой img для анимации + фоллбек: если img не загрузится,
-            фон из --ad-bg всё равно виден */}
-        <div className="ad-stack" aria-hidden="true">
+        {/* стек для плавного фейда */}
+        <div className="ad-stack">
           {ads.map((a, i) => (
             <img
               key={i}
               src={a.img}
               alt=""
-              aria-hidden="true"
               className={`ad-frame ${i === idx ? "active" : ""}`}
               draggable="false"
-              onError={(e) => { e.currentTarget.style.display = "none"; }}
             />
           ))}
         </div>
 
+        {/* бейдж */}
         <div className="ad-tag">Advertising</div>
 
-        <div className="ad-hover">
+        {/* ховер-подпись */}
+        <div className="ad-hover" aria-hidden="true">
           <div className="ad-hover-inner">
             <div className="ad-title">{ads[idx].title}</div>
             <div className="ad-sub">{ads[idx].sub}</div>
