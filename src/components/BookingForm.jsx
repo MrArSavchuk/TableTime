@@ -112,7 +112,7 @@ export default function BookingForm() {
     formState: { errors, isSubmitting },
   } = useForm({
     defaultValues: {
-      restaurant: "", // теперь это будет id выбранного ресторана
+      restaurant: "", 
       date: "",
       time: "",
       guests: 2,
@@ -133,7 +133,7 @@ export default function BookingForm() {
   const timePanelRef = useRef(null);
   const dateNativeRef = useRef(null);
 
-  const restaurantId = watch("restaurant"); // id ресторана
+  const restaurantId = watch("restaurant"); 
   const dateVal = watch("date");
 
   const openDatePicker = () => {
@@ -142,7 +142,6 @@ export default function BookingForm() {
     if (typeof el.showPicker === "function") el.showPicker(); else el.focus();
   };
 
-  // подгружаем список ресторанов (в проде это MSW)
   useEffect(() => {
     let cancelled = false;
     const load = async (retry = false) => {
@@ -159,7 +158,6 @@ export default function BookingForm() {
     return () => { cancelled = true; };
   }, []);
 
-  // min/max для родного date-picker’а
   useEffect(() => {
     const el = dateNativeRef.current;
     if (!el) return;
@@ -168,7 +166,6 @@ export default function BookingForm() {
     el.max = toISODate(maxDate);
   }, [today, maxDate]);
 
-  // слоты при валидной дате + выбранном ресторане
   useEffect(() => {
     const validDate =
       /^(0[1-9]|1[0-2])\/(0[1-9]|[12]\d|3[01])\/\d{4}$/.test(String(dateVal || "")) &&
@@ -191,7 +188,6 @@ export default function BookingForm() {
     setServerError("");
     setResult(null);
     try {
-      // найдём читаемое имя для подтверждения
       const picked = restaurants.find((r) => String(r.id) === String(data.restaurant)) || restaurants[0];
 
       try {
@@ -340,14 +336,12 @@ export default function BookingForm() {
 
       <form className="form" onSubmit={submitRHF(onSubmit)} noValidate>
         <div className="grid">
-          {/* Restaurant — простой и надёжный <select> */}
           <div className="field">
             <label htmlFor="restaurant">Restaurant</label>
             <select
               id="restaurant"
               {...register("restaurant", { required: true })}
               onChange={(e) => {
-                // RHF обработает value сам, но мы подчистим time/slots при смене ресторана
                 setValue("time", "");
                 setShowTimePanel(false);
                 setHiTime(0);
@@ -402,7 +396,6 @@ export default function BookingForm() {
             </p>
           </div>
 
-          {/* Time + поповер со слотами (остался прежним) */}
           <div className="field with-addon">
             <label htmlFor="time">Time</label>
             <input

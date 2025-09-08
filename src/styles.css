@@ -327,7 +327,6 @@ input[type="time"]::-webkit-calendar-picker-indicator { opacity: 0; }
 /* =========================
    Page background (day/night)
    ========================= */
-/* Файлы лежат в /public → абсолютный путь */
 :root {
   --bg-image: url('/back_day.jpg');
   --bg-overlay: rgba(255, 255, 255, .20);
@@ -368,7 +367,6 @@ body::before {
   isolation:isolate;
 }
 
-/* 0 — картинки ниже всего и не перехватывают события */
 .adbx-stack{position:absolute; inset:0; z-index:0; pointer-events:none;}
 .adbx-frame{
   position:absolute; inset:0;
@@ -380,7 +378,6 @@ body::before {
 }
 .adbx-frame.is-active{ opacity:1; transform:scale(1); }
 
-/* 1 — виньетка над картинками, ниже текста */
 .adbx-board::after{
   content:"";
   position:absolute; inset:0;
@@ -390,7 +387,6 @@ body::before {
     linear-gradient(180deg, rgba(0,0,0,.06) 0%, rgba(0,0,0,.35) 85%);
 }
 
-/* 2 — ховер-подложка с текстом */
 .adbx-hover{
   position:absolute; inset:0;
   z-index:2;
@@ -410,7 +406,6 @@ body::before {
 .adbx-title{display:block; font-weight:800; font-size:15px; line-height:1.15; margin:0 0 2px;}
 .adbx-sub{display:block; font-size:12px; opacity:.95; margin:0;}
 
-/* 3 — бейдж */
 .adbx-badge{
   position:absolute; left:12px; top:12px;
   z-index:3;
@@ -422,7 +417,6 @@ body::before {
   user-select:none;
 }
 
-/* Попап через портал в body */
 .adbx-modal{
   position:fixed; inset:0; z-index:1000;
   display:grid; place-items:center;
@@ -446,7 +440,6 @@ body::before {
   background:var(--panel); color:var(--text); cursor:pointer;
 }
 
-/* touch: всегда показываем подпись (нет hover) */
 @media (hover:none){
   .adbx-board .adbx-hover{ opacity:1; transform:none; background:linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,.35) 100%); }
 }
